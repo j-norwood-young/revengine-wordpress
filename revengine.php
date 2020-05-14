@@ -21,6 +21,8 @@ function revengine_init() {
     // Modules - these should eventually autoload
     require_once(plugin_basename('modules/piano-composer/piano-composer.php' ) );
     $piano_composer = new PianoComposer($revengine_globals);
+    require_once(plugin_basename('modules/revengine-tracker/revengine-tracker.php' ) );
+    $revengine_tracker = new RevEngineTracker($revengine_globals);
 }
 add_action( 'init', 'revengine_init', 11 );
 

@@ -21,7 +21,7 @@ class PianoComposer {
             // an admin-level user.
             'manage_options',
             'revengine-piano_composer-options',
-            [ $this, 'piano_options' ]
+            [ $this, 'admin_options_template' ]
         );
     }
 
@@ -31,7 +31,7 @@ class PianoComposer {
         }
     }
 
-    function piano_options() {
+    function admin_options_template() {
         require_once plugin_dir_path( dirname( __FILE__ ) ).'piano-composer/templates/admin/piano-composer-options.php';
     }
 
