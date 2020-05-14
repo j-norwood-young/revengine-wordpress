@@ -29,6 +29,6 @@ class RevEngineAdmin {
     }
 
     function revengine_options() {
-		require_once plugin_dir_path( dirname( __FILE__ ) ).'templates/admin/options.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ).'templates/admin/revengine-options.php';
     }
 }
