@@ -32,7 +32,7 @@ class PianoComposer {
     }
 
     function piano_options() {
-        require_once plugin_dir_path( dirname( __FILE__ ) ).'piano-composer/templates/admin/options.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ).'piano-composer/templates/admin/piano-composer-options.php';
     }
 
     function scripts() {
