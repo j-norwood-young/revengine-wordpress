@@ -1,7 +1,10 @@
 <?php
 
 class RevEngineAdmin {
-    protected $options = [];
+    protected $options = [
+        "revengine_server_address",
+        "revengine_enable_tracking"
+    ];
 
     function __construct($revengine_globals) {
         $this->revengine_globals = &$revengine_globals;
