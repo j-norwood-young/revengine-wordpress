@@ -41,6 +41,11 @@ class RevEngineTracker {
             $options[$option] = get_option($option);
         }
         if ($options["revengine_enable_tracking"]) {
+            $browser_token = $_COOKIE["revengine-browser-token"];
+            if (empty($browser_token)) {
+                $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
+                setcookie("revengine-browser-token", $browser_token);
+            }
             $post_id = get_the_ID();
             $post = get_post($post_id);
             $data = (object) [
@@ -57,7 +62,8 @@ class RevEngineTracker {
                 "post_author" => get_the_author_meta("display_name", $post->post_author),
                 "post_tags" => array_map(function($i) { return $i->name; }, get_the_terms($post_id, "article_tag")),
                 "post_sections" => array_map(function($i) { return $i->name; }, get_the_terms($post_id, "section")),
-                "user_id" => get_current_user_id()
+                "user_id" => get_current_user_id(),
+                "browser_id" => $browser_token,
             ];
             $ch = curl_init($options["revengine_tracker_server_address"]);
             $data_encoded = json_encode($data);
@@ -72,16 +78,17 @@ class RevEngineTracker {
             }
             curl_close($ch);
             print_r("Server123\n");
+            print_r($_COOKIE);
+            // print_r("\n\n");
+            // print_r($_SESSION);
+            // print_r("\n\n");
+            // print_r(wp_get_session_token());
             print_r($data);
-            print_r("Result\n");
-            print_r($result);
-            print_r("Error\n");
-            print_r($error);
-            print_r("\n\n");
-            // $fname = plugin_dir_url( __FILE__ ) . 'js/piano.js';
-            // $ver = date("ymd-Gis", filemtime($fname));
-            // wp_enqueue_script( "revengine-revengine-tracker", $fname, null, $ver, true );
-            // wp_localize_script( "revengine-revengine-tracker", "revengine_piano_composer_vars", $options);
+            // print_r("Result\n");
+            // print_r($result);
+            // print_r("Error\n");
+            // print_r($error);
+            // print_r("\n\n");
         }
     }
 }
