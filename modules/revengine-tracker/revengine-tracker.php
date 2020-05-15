@@ -77,18 +77,6 @@ class RevEngineTracker {
                 $error = curl_error($ch);
             }
             curl_close($ch);
-            print_r("Server123\n");
-            print_r($_COOKIE);
-            // print_r("\n\n");
-            // print_r($_SESSION);
-            // print_r("\n\n");
-            // print_r(wp_get_session_token());
-            print_r($data);
-            // print_r("Result\n");
-            // print_r($result);
-            // print_r("Error\n");
-            // print_r($error);
-            // print_r("\n\n");
         }
     }
 }
