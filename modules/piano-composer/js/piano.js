@@ -1,3 +1,11 @@
+var tp = window["tp"] || [];
+tp.push(["setContentCreated", revengine_piano_composer_vars.date_published]);
+tp.push(["setContentAuthor", revengine_piano_composer_vars.author]);
+tp.push(["setContentSection", revengine_piano_composer_vars.sections]);
+tp.push(["setTags", revengine_piano_composer_vars.tags]);
+tp.push(["setCustomParam", "type", "premium", "content"])
+tp.push(["setCustomVariable", "logged_in", !!(revengine_piano_composer_vars.logged_in)]);
+tp.push(["setCustomVariable", "memberships", revengine_piano_composer_vars.memberships]);
 (function(src){
     var a=document.createElement("script");
     a.type="text/javascript";
