@@ -36,8 +36,15 @@ class PianoComposer {
     }
 
     function scripts() {
-        $post_id = get_the_ID();
-        $post_type = get_post_type($post_id);
+        $post_id = get_queried_object_id();
+        $post = get_queried_object();
+        if (!empty($post->post_type)) {
+            $post_type = $post->post_type;
+        } else if (!empty($post->taxonomy)) {
+            $post_type = $post->taxonomy;
+        } else {
+            $post_type = "";
+        }
         $options = [
             "post_type" => $post_type,
             "date_published" => get_the_date("c"),
@@ -48,21 +55,23 @@ class PianoComposer {
             $options["memberships"] = $memberships;
         }
         if ($post_type === "article") {
-            $options["author"] = get_the_author_meta("display_name", $post->post_author);
+            $options["author"] = get_the_author_meta("display_name");
             $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "article_tag"));
             $options["sections"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "section"));
         } else if ($post_type === "opinion-piece") {
-            $options["author"] = get_the_author_meta("display_name", $post->post_author);
+            $options["author"] = get_the_author_meta("display_name");
             $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "opinion-piece-tag"));
             $options["sections"] = ["opinionista"];
         }
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
         }
+        // trigger_error(json_encode($options), E_USER_NOTICE);
         if ($options["revengine_piano_active"]) {
-            $fname = plugin_dir_url( __FILE__ ) . 'js/piano.js';
+            $furl = plugin_dir_url( __FILE__ ) . 'js/piano.js';
+            $fname = plugin_dir_path( __FILE__ ) . 'js/piano.js';
             $ver = date("ymd-Gis", filemtime($fname));
-            wp_enqueue_script( "revengine-piano-composer", $fname, null, $ver, true );
+            wp_enqueue_script( "revengine-piano-composer", $furl, null, $ver, true );
             wp_localize_script( "revengine-piano-composer", "revengine_piano_composer_vars", $options);
         }
     }

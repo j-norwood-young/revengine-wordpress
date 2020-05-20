@@ -41,30 +41,55 @@ class RevEngineTracker {
             $options[$option] = get_option($option);
         }
         if ($options["revengine_enable_tracking"]) {
+            $post = get_queried_object();
+            $post_id = get_queried_object_id();
+            if (!empty($post->post_type)) {
+                $post_type = $post->post_type;
+            } else if (!empty($post->taxonomy)) {
+                $post_type = $post->taxonomy;
+            } else {
+                $post_type = "";
+            }
+            if (!empty($post->post_title)) {
+                $post_title = $post->post_title;
+            } else if (!empty($post->name)) {
+                $post_title = $post->name;
+            } else {
+                $post_title = "";
+            }
+            // trigger_error(json_encode($post), E_USER_NOTICE);
             $browser_token = $_COOKIE["revengine-browser-token"];
             if (empty($browser_token)) {
                 $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
                 setcookie("revengine-browser-token", $browser_token);
             }
-            $post_id = get_the_ID();
-            $post = get_post($post_id);
             $data = (object) [
                 "action" => "pageview",
                 "ip" => $_SERVER["REMOTE_ADDR"],
                 "user_agent" => $_SERVER["HTTP_USER_AGENT"],
                 "referer" => $_SERVER["HTTP_REFERER"],
-                "raw_uri" => $_SERVER["REQUEST_URI"],
-                "uri" => $_SERVER["REDIRECT_URL"],
+                "url" => $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]",
                 "query_string" => $_SERVER["QUERY_STRING"],
                 "request_time" => $_SERVER["REQUEST_TIME"],
                 "post_id" => $post_id,
-                "post_title" => esc_html(get_the_title()),
-                "post_author" => get_the_author_meta("display_name", $post->post_author),
-                "post_tags" => array_map(function($i) { return $i->name; }, get_the_terms($post_id, "article_tag")),
-                "post_sections" => array_map(function($i) { return $i->name; }, get_the_terms($post_id, "section")),
                 "user_id" => get_current_user_id(),
                 "browser_id" => $browser_token,
+                "post_title" => esc_html($post_title),
+                "post_type" => $post_type,
+                "home_page" => is_front_page(),
             ];
+            if ($post_type == "article" || $post_type == "opinion-piece") { // Empty post types are section pages, home pages etc
+                $data->post_author = get_the_author_meta("display_name", $post->post_author);
+                $terms = get_the_terms($post_id, "section");
+                if (is_array($terms)) {
+                    $data->post_sections = array_map(function($i) { return $i->name; }, $terms);
+                }
+                $tags = get_the_terms($post_id, "article_tag");
+                if (is_array($tags)) {
+                    $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
+                }
+            }
+            // trigger_error(json_encode($data), E_USER_NOTICE);
             $ch = curl_init($options["revengine_tracker_server_address"]);
             $data_encoded = json_encode($data);
             curl_setopt($ch, CURLOPT_POST, 1);
