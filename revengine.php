@@ -5,7 +5,7 @@
  * Description: Data from the reader's perspective. A Daily Maverick initiative sponsored by the Google News Initiative.
  * Author: DailyMaverick, Jason Norwood-Young
  * Author URI: https://dailymaverick.co.za
- * Version: 0.0.1-0
+ * Version: 0.0.2-0
  * WC requires at least: 3.9
  * Tested up to: 3.9
  *
