@@ -68,7 +68,6 @@ class RevEngineTracker {
                 "action" => "pageview",
                 "ip" => $_SERVER["REMOTE_ADDR"],
                 "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-                "referer" => $_SERVER["HTTP_REFERER"],
                 "url" => $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]",
                 "query_string" => $_SERVER["QUERY_STRING"],
                 "request_time" => $_SERVER["REQUEST_TIME"],
@@ -79,6 +78,9 @@ class RevEngineTracker {
                 "post_type" => $post_type,
                 "home_page" => is_front_page(),
             ];
+            if (isset($_SERVER["HTTP_REFERER"])) {
+                $data->referer = $_SERVER["HTTP_REFERER"];
+            }
             if ($post_type == "article" || $post_type == "opinion-piece") { // Empty post types are section pages, home pages etc
                 $data->post_author = get_the_author_meta("display_name", $post->post_author);
                 $terms = get_the_terms($post_id, "section");
