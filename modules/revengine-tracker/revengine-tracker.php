@@ -36,6 +36,7 @@ class RevEngineTracker {
 
     function hit() {
         if (is_admin()) return; // Front end only
+        if (is_404()) return; // Don't log 404s
         $options = [];
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
