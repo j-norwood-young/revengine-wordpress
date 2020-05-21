@@ -89,7 +89,6 @@ class RevEngineTracker {
                     $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
                 }
             }
-            // trigger_error(json_encode($data), E_USER_NOTICE);
             $ch = curl_init($options["revengine_tracker_server_address"]);
             $data_encoded = json_encode($data);
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -100,6 +99,7 @@ class RevEngineTracker {
             $error = "";
             if(curl_error($ch)) {
                 $error = curl_error($ch);
+                trigger_error($error, E_USER_WARNING);
             }
             curl_close($ch);
         }
