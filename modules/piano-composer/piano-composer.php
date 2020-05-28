@@ -58,6 +58,12 @@ class PianoComposer {
             $options["author"] = get_the_author_meta("display_name");
             $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "article_tag"));
             $options["sections"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "section"));
+            $term_list = wp_get_post_terms($post_id, 'section', ['fields' => 'all']);
+            foreach($term_list as $term) {
+                if( get_post_meta($post_id, '_yoast_wpseo_primary_section',true) == $term->term_id ) {
+                    $options["primary_section"] = $term->name;
+                }
+            }
         } else if ($post_type === "opinion-piece") {
             $options["author"] = get_the_author_meta("display_name");
             $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "opinion-piece-tag"));
