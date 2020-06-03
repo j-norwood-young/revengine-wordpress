@@ -2,7 +2,8 @@
 class RevEngineTracker {
     private $options = [
         "revengine_enable_tracking",
-        "revengine_tracker_server_address"
+        "revengine_tracker_server_address",
+        "revengine_tracker_debug"
     ];
 
     function __construct($revengine_globals) {
@@ -41,6 +42,10 @@ class RevEngineTracker {
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
         }
+        $debug = false;
+        if ($options["revengine_tracker_debug"]) {
+            $debug = true;
+        }
         if ($options["revengine_enable_tracking"]) {
             $post = get_queried_object();
             $post_id = get_queried_object_id();
@@ -59,8 +64,9 @@ class RevEngineTracker {
                 $post_title = "";
             }
             // trigger_error(json_encode($post), E_USER_NOTICE);
-            $browser_token = $_COOKIE["revengine-browser-token"];
-            if (empty($browser_token)) {
+            if (isset($_COOKIE["revengine-browser-token"])) {
+                $browser_token = $_COOKIE["revengine-browser-token"];
+            } else {
                 $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
                 setcookie("revengine-browser-token", $browser_token);
             }
@@ -99,6 +105,10 @@ class RevEngineTracker {
             curl_setopt($ch, CURLOPT_TIMEOUT_MS, 500);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
             $result = curl_exec($ch);
+            if ($debug) {
+                trigger_error($data_encoded, E_USER_NOTICE);
+                trigger_error($result, E_USER_NOTICE);
+            }
             $error = "";
             if(curl_error($ch)) {
                 $error = curl_error($ch);

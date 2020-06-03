@@ -25,7 +25,14 @@
                         <input style="width: 600px; height: 40px;" name="revengine_tracker_server_address" placeholder="https://revengine.dailymaverick.com" id="revengine_tracker_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_tracker_server_address') ); ?>">
                     </td>
                 </tr>
-                
+                <tr>
+                    <th scope="row">Enable Debug</th>
+                    <td>
+                        <label for="revengine_tracker_debug">
+                            <input name="revengine_tracker_debug" type="checkbox" id="revengine_tracker_debug" value="1" <?= (get_option("revengine_tracker_debug")) ? 'checked="checked"' : "" ?>>
+                        </label>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <?=	submit_button(); ?>
