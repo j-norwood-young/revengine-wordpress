@@ -49,6 +49,14 @@
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row">Use IFrame Method</th>
+                    <td>
+                        <label for="revengine_tracker_iframe">
+                            <input name="revengine_tracker_iframe" type="checkbox" id="revengine_tracker_iframe" value="1" <?= (get_option("revengine_tracker_iframe")) ? 'checked="checked"' : "" ?>>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row">Enable Debug</th>
                     <td>
                         <label for="revengine_tracker_debug">
