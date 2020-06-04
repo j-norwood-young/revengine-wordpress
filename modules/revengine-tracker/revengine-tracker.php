@@ -103,11 +103,7 @@ class RevEngineTracker {
                     $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
                 }
             }
-            
             $data_encoded = json_encode($data);
-            if ($debug) {
-                trigger_error($data_encoded, E_USER_NOTICE);
-            }
             $fp = pfsockopen($options["revengine_tracker_server_address"], $options["revengine_tracker_server_port"], $errno, $errstr, $options["revengine_tracker_timeout"]);
             $out ="POST / HTTP/1.1\r\n";
             $out.= "Host: " . $options["revengine_tracker_server_address"] . "\r\n";
