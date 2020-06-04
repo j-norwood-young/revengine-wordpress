@@ -40,6 +40,58 @@ class RevEngineTracker {
         require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-tracker/templates/admin/revengine-tracker-options.php';
     }
 
+    function get_post_data() {
+        $post = get_queried_object();
+        $post_id = get_queried_object_id();
+        if (!empty($post->post_type)) {
+            $post_type = $post->post_type;
+        } else if (!empty($post->taxonomy)) {
+            $post_type = $post->taxonomy;
+        } else {
+            $post_type = "";
+        }
+        if (!empty($post->post_title)) {
+            $post_title = $post->post_title;
+        } else if (!empty($post->name)) {
+            $post_title = $post->name;
+        } else {
+            $post_title = "";
+        }
+        // trigger_error(json_encode($post), E_USER_NOTICE);
+        if (isset($_COOKIE["revengine-browser-token"])) {
+            $browser_token = $_COOKIE["revengine-browser-token"];
+        } else {
+            $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
+            setcookie("revengine-browser-token", $browser_token);
+        }
+        $data = (object) [
+            "action" => "pageview",
+            "ip" => $_SERVER["REMOTE_ADDR"],
+            "request_time" => $_SERVER["REQUEST_TIME"],
+            "post_id" => $post_id,
+            "user_id" => get_current_user_id(),
+            "browser_id" => $browser_token,
+            "post_title" => esc_html($post_title),
+            "post_type" => $post_type,
+            "home_page" => is_front_page(),
+        ];
+        if (isset($_SERVER["HTTP_REFERER"])) {
+            $data->referer = $_SERVER["HTTP_REFERER"];
+        }
+        if ($post_type == "article" || $post_type == "opinion-piece") { // Empty post types are section pages, home pages etc
+            $data->post_author = get_the_author_meta("display_name", $post->post_author);
+            $terms = get_the_terms($post_id, "section");
+            if (is_array($terms)) {
+                $data->post_sections = array_map(function($i) { return $i->name; }, $terms);
+            }
+            $tags = get_the_terms($post_id, "article_tag");
+            if (is_array($tags)) {
+                $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
+            }
+        }
+        return $data;
+    }
+
     function iframe() {
         if (is_admin()) return; // Front end only
         if (is_404()) return; // Don't log 404s
@@ -65,6 +117,9 @@ class RevEngineTracker {
                     $revengine_server = $revengine_server . ":" . $options["revengine_tracker_server_port"];
                 }
             }
+            $data = $this->get_post_data();
+            $revengine_server = $revengine_server . "?" . http_build_query($data);
+            print_r($data);
             require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-tracker/templates/frontend/iframe.php';
         }
     }
@@ -85,57 +140,9 @@ class RevEngineTracker {
             $debug = true;
         }
         if ($options["revengine_enable_tracking"]) {
-            $post = get_queried_object();
-            $post_id = get_queried_object_id();
-            if (!empty($post->post_type)) {
-                $post_type = $post->post_type;
-            } else if (!empty($post->taxonomy)) {
-                $post_type = $post->taxonomy;
-            } else {
-                $post_type = "";
-            }
-            if (!empty($post->post_title)) {
-                $post_title = $post->post_title;
-            } else if (!empty($post->name)) {
-                $post_title = $post->name;
-            } else {
-                $post_title = "";
-            }
-            // trigger_error(json_encode($post), E_USER_NOTICE);
-            if (isset($_COOKIE["revengine-browser-token"])) {
-                $browser_token = $_COOKIE["revengine-browser-token"];
-            } else {
-                $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
-                setcookie("revengine-browser-token", $browser_token);
-            }
-            $data = (object) [
-                "action" => "pageview",
-                "ip" => $_SERVER["REMOTE_ADDR"],
-                "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-                "url" => $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]",
-                "query_string" => $_SERVER["QUERY_STRING"],
-                "request_time" => $_SERVER["REQUEST_TIME"],
-                "post_id" => $post_id,
-                "user_id" => get_current_user_id(),
-                "browser_id" => $browser_token,
-                "post_title" => esc_html($post_title),
-                "post_type" => $post_type,
-                "home_page" => is_front_page(),
-            ];
-            if (isset($_SERVER["HTTP_REFERER"])) {
-                $data->referer = $_SERVER["HTTP_REFERER"];
-            }
-            if ($post_type == "article" || $post_type == "opinion-piece") { // Empty post types are section pages, home pages etc
-                $data->post_author = get_the_author_meta("display_name", $post->post_author);
-                $terms = get_the_terms($post_id, "section");
-                if (is_array($terms)) {
-                    $data->post_sections = array_map(function($i) { return $i->name; }, $terms);
-                }
-                $tags = get_the_terms($post_id, "article_tag");
-                if (is_array($tags)) {
-                    $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
-                }
-            }
+            $data = $this->get_post_data();
+            $data->user_agent = $_SERVER["HTTP_USER_AGENT"];
+            $data->url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
             $data_encoded = json_encode($data);
             $server_address = $options["revengine_tracker_server_address"];
             if ($options["revengine_tracker_ssl"]) {
