@@ -100,18 +100,15 @@ class RevEngineTracker {
             }
             $ch = curl_init($options["revengine_tracker_server_address"]);
             $data_encoded = json_encode($data);
+            if ($debug) {
+                trigger_error($data_encoded, E_USER_NOTICE);
+            }
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_encoded);
             curl_setopt($ch, CURLOPT_TIMEOUT_MS, 500);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $result = curl_exec($ch);
-            if ($debug) {
-                trigger_error($data_encoded, E_USER_NOTICE);
-                trigger_error($result, E_USER_NOTICE);
-            }
-            $error = "";
-            if(curl_error($ch)) {
+            if (curl_exec($ch) === false) {
                 $error = curl_error($ch);
                 trigger_error($error, E_USER_WARNING);
             }
