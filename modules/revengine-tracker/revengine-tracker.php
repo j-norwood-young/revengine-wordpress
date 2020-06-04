@@ -104,6 +104,7 @@ class RevEngineTracker {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_encoded);
             curl_setopt($ch, CURLOPT_TIMEOUT_MS, 500);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $result = curl_exec($ch);
             if ($debug) {
                 trigger_error($data_encoded, E_USER_NOTICE);
