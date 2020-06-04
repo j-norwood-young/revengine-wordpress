@@ -23,7 +23,7 @@
                     <th scope="row">RevEngine Tracker Server Address</th>
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_tracker_server_address" placeholder="revengine.dailymaverick.com" id="revengine_tracker_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_tracker_server_address') ); ?>">
-                        <p>For http, ommit the "http://". For https, use "ssl://"</p>
+                        <p>Ommit the "http(s)://".</p>
                     </td>
                 </tr>
                 <tr>
@@ -31,6 +31,14 @@
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_tracker_server_port" placeholder="443" id="revengine_tracker_server_port" type="number" value="<?php echo esc_attr( get_option('revengine_tracker_server_port') ); ?>">
                         <p>80 for http, 443 for https</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Use SSL</th>
+                    <td>
+                        <label for="revengine_tracker_ssl">
+                            <input name="revengine_tracker_ssl" type="checkbox" id="revengine_tracker_ssl" value="1" <?= (get_option("revengine_tracker_ssl")) ? 'checked="checked"' : "" ?>>
+                        </label>
                     </td>
                 </tr>
                 <tr>

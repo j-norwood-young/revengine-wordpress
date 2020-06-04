@@ -4,6 +4,7 @@ class RevEngineTracker {
         "revengine_enable_tracking",
         "revengine_tracker_server_address",
         "revengine_tracker_server_port",
+        "revengine_tracker_ssl",
         "revengine_tracker_debug",
         "revengine_tracker_timeout"
     ];
@@ -104,7 +105,11 @@ class RevEngineTracker {
                 }
             }
             $data_encoded = json_encode($data);
-            $fp = pfsockopen($options["revengine_tracker_server_address"], $options["revengine_tracker_server_port"], $errno, $errstr, $options["revengine_tracker_timeout"]);
+            $server_address = $options["revengine_tracker_server_address"];
+            if ($options["revengine_tracker_ssl"]) {
+                $server_address = "ssl://" . $server_address;
+            }
+            $fp = pfsockopen($server_address, $options["revengine_tracker_server_port"], $errno, $errstr, $options["revengine_tracker_timeout"]);
             $out ="POST / HTTP/1.1\r\n";
             $out.= "Host: " . $options["revengine_tracker_server_address"] . "\r\n";
             $out.= "Content-Type: application/json\r\n";
@@ -112,7 +117,10 @@ class RevEngineTracker {
             $out.= "Connection: Close\r\n\r\n";
             $out.= $data_encoded;
             fwrite($fp, $out);
+            // fflush($fp);
+            // fclose($fp);
             if ($debug) {
+                trigger_error($server_address . ":" . $options["revengine_tracker_server_port"], E_USER_NOTICE);
                 trigger_error($out, E_USER_NOTICE);
             }
             if ($errno) {
