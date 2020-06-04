@@ -26,6 +26,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row">RevEngine Tracker Timeout</th>
+                    <td>
+                        <input style="width: 600px; height: 40px;" name="revengine_tracker_timeout" placeholder="milliseconds" id="revengine_tracker_timeout" type="number" value="<?php echo esc_attr( get_option('revengine_tracker_timeout') ); ?>">
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row">Enable Debug</th>
                     <td>
                         <label for="revengine_tracker_debug">

@@ -3,7 +3,8 @@ class RevEngineTracker {
     private $options = [
         "revengine_enable_tracking",
         "revengine_tracker_server_address",
-        "revengine_tracker_debug"
+        "revengine_tracker_debug",
+        "revengine_tracker_timeout"
     ];
 
     function __construct($revengine_globals) {
@@ -41,6 +42,9 @@ class RevEngineTracker {
         $options = [];
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
+        }
+        if (empty($options["revengine_tracker_timeout"])) {
+            $options["revengine_tracker_timeout"] = 500; // Default 500ms
         }
         $debug = false;
         if ($options["revengine_tracker_debug"]) {
@@ -105,7 +109,7 @@ class RevEngineTracker {
             }
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_encoded);
-            curl_setopt($ch, CURLOPT_TIMEOUT_MS, 500);
+            curl_setopt($ch, CURLOPT_TIMEOUT_MS, $options["revengine_tracker_timeout"]);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             if (curl_exec($ch) === false) {
