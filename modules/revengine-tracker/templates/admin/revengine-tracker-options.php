@@ -22,13 +22,22 @@
                 <tr>
                     <th scope="row">RevEngine Tracker Server Address</th>
                     <td>
-                        <input style="width: 600px; height: 40px;" name="revengine_tracker_server_address" placeholder="https://revengine.dailymaverick.com" id="revengine_tracker_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_tracker_server_address') ); ?>">
+                        <input style="width: 600px; height: 40px;" name="revengine_tracker_server_address" placeholder="revengine.dailymaverick.com" id="revengine_tracker_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_tracker_server_address') ); ?>">
+                        <p>For http, ommit the "http://". For https, use "ssl://"</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">RevEngine Tracker Server Port</th>
+                    <td>
+                        <input style="width: 600px; height: 40px;" name="revengine_tracker_server_port" placeholder="443" id="revengine_tracker_server_port" type="number" value="<?php echo esc_attr( get_option('revengine_tracker_server_port') ); ?>">
+                        <p>80 for http, 443 for https</p>
                     </td>
                 </tr>
                 <tr>
                     <th scope="row">RevEngine Tracker Timeout</th>
                     <td>
-                        <input style="width: 600px; height: 40px;" name="revengine_tracker_timeout" placeholder="milliseconds" id="revengine_tracker_timeout" type="number" value="<?php echo esc_attr( get_option('revengine_tracker_timeout') ); ?>">
+                        <input style="width: 600px; height: 40px;" name="revengine_tracker_timeout" placeholder="1" id="revengine_tracker_timeout" type="number" value="<?php echo esc_attr( get_option('revengine_tracker_timeout') ); ?>">
+                        <p>Timeout in seconds</p>
                     </td>
                 </tr>
                 <tr>

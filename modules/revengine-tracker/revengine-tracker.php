@@ -3,6 +3,7 @@ class RevEngineTracker {
     private $options = [
         "revengine_enable_tracking",
         "revengine_tracker_server_address",
+        "revengine_tracker_server_port",
         "revengine_tracker_debug",
         "revengine_tracker_timeout"
     ];
@@ -44,7 +45,7 @@ class RevEngineTracker {
             $options[$option] = get_option($option);
         }
         if (empty($options["revengine_tracker_timeout"])) {
-            $options["revengine_tracker_timeout"] = 500; // Default 500ms
+            $options["revengine_tracker_timeout"] = 1; // Default 1s
         }
         $debug = false;
         if ($options["revengine_tracker_debug"]) {
@@ -102,21 +103,25 @@ class RevEngineTracker {
                     $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
                 }
             }
-            $ch = curl_init($options["revengine_tracker_server_address"]);
+            
             $data_encoded = json_encode($data);
             if ($debug) {
                 trigger_error($data_encoded, E_USER_NOTICE);
             }
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_encoded);
-            curl_setopt($ch, CURLOPT_TIMEOUT_MS, $options["revengine_tracker_timeout"]);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            if (curl_exec($ch) === false) {
-                $error = curl_error($ch);
-                trigger_error($error, E_USER_WARNING);
+            $fp = pfsockopen($options["revengine_tracker_server_address"], $options["revengine_tracker_server_port"], $errno, $errstr, $options["revengine_tracker_timeout"]);
+            $out ="POST / HTTP/1.1\r\n";
+            $out.= "Host: " . $options["revengine_tracker_server_address"] . "\r\n";
+            $out.= "Content-Type: application/json\r\n";
+            $out.= "Content-Length: " . strlen($data_encoded)."\r\n";
+            $out.= "Connection: Close\r\n\r\n";
+            $out.= $data_encoded;
+            fwrite($fp, $out);
+            if ($debug) {
+                trigger_error($out, E_USER_NOTICE);
             }
-            curl_close($ch);
+            if ($errno) {
+                trigger_error($errstr, E_USER_WARNING);
+            }
         }
     }
 }
