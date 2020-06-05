@@ -119,7 +119,6 @@ class RevEngineTracker {
             }
             $data = $this->get_post_data();
             $revengine_server = $revengine_server . "?" . http_build_query($data);
-            print_r($data);
             require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-tracker/templates/frontend/iframe.php';
         }
     }
