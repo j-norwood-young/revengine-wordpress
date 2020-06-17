@@ -23,8 +23,10 @@ function revengine_init() {
     $piano_composer = new PianoComposer($revengine_globals);
     require_once(plugin_basename('modules/revengine-tracker/revengine-tracker.php' ) );
     $revengine_tracker = new RevEngineTracker($revengine_globals);
+    require_once(plugin_basename('modules/revengine-content/revengine-content.php' ) );
+    $revengine_content = new RevEngineContent($revengine_globals);
 }
-add_action( 'init', 'revengine_init', 11 );
+add_action( 'init', 'revengine_init', 5 );
 
 // Shortcodes
 function shortcodes($atts) {
