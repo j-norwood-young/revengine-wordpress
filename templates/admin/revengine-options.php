@@ -12,9 +12,9 @@
         <table class="form-table">
             <tbody>
                 <tr>
-                    <th scope="row">RevEngine Server Address</th>
+                    <th scope="row">RevEngine API Key</th>
                     <td>
-                        <input style="width: 600px; height: 40px;" name="revengine_server_address" placeholder="https://revengine.dailymaverick.com" id="revengine_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_server_address') ); ?>">
+                        <input style="width: 600px; height: 40px;" name="revengine_api_key" id="revengine_api_key" type="text" value="<?php echo esc_attr( get_option('revengine_api_key') ); ?>" readonly="readonly">
                     </td>
                 </tr>
             </tbody>
