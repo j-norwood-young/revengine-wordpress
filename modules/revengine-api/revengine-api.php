@@ -53,6 +53,16 @@ class RevEngineAPI {
             'callback' => [$this, 'get_users'],
             'permission_callback' => [$this, 'check_access']
         ) );
+        register_rest_route( 'revengine/v1', '/woocommerce_orders', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_woocommerce_orders'],
+            'permission_callback' => [$this, 'check_access']
+        ) );
+        register_rest_route( 'revengine/v1', '/woocommerce_subscriptions', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_woocommerce_subscriptions'],
+            'permission_callback' => [$this, 'check_access']
+        ) );
     }
 
     function check_access(WP_REST_Request $request) {
@@ -157,6 +167,73 @@ class RevEngineAPI {
             }
             $result[] = $user;
         }
+        $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
+        $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
+        $data = [
+            "page" => $page,
+            "per_page" => $per_page,
+            "page_count" => $page_count,
+            "total_count" => $count,
+        ];
+        if ($page > 1) {
+            $data["prev"] = $prev_url;
+        }
+        if ($page < $page_count) {
+            $data["next"] = $next_url;
+        }
+        $data["data"] = $result;
+        return $data;
+    }
+
+    function get_woocommerce_orders(WP_REST_Request $request) {
+        function isSerialized($str) {
+            return ($str == serialize(false) || @unserialize($str) !== false);
+        }
+        global $wpdb;
+        $per_page = intval($request->get_param( "per_page") ?? 10);
+        $page = intval($request->get_param( "page") ?? 1);
+        $offset = ($page - 1) * $per_page;
+        $result = [];
+        $args = array(
+            "paginate" => true,
+            "orderby" => "modified",
+            "order" => "DESC",
+            "return" => "ids",
+            "limit" => $per_page,
+            "offset" => $offset,
+            'type' => 'shop_order'
+        );
+        $orders = wc_get_orders( $args );
+        foreach($orders->orders as $order_id) {
+            $order = wc_get_order( $order_id );
+            $order_data = array(
+                "id" => $order->get_id(),
+                "date_created" => $order->get_date_created(),
+                "date_modified" => $order->get_date_modified(),
+                "date_completed" => $order->get_date_completed(),
+                "date_paid" => $order->get_date_paid(),
+                "total" => $order->get_total(),
+                "customer_id" => $order->get_customer_id(),
+                "order_key" => $order->get_order_key(),
+                "user" => $order->get_user(),
+                "payment_method" => $order->get_payment_method(),
+                "customer_ip_address" => $order->get_customer_ip_address(),
+                "customer_user_agent" => $order->get_customer_user_agent(),
+                "products" => [],
+            );
+            $items = $order->get_items();
+            foreach ($items  as $item ) {
+                $product = $item->get_product();
+                $order_data["products"][] = array(
+                    "name" => $product->get_name(),
+                    "quantity" => $item->get_quantity(),
+                    "total" => $item->get_total(),
+                );
+            }
+            $result[] = $order_data;
+        }
+        $count = intval($orders->total);
+        $page_count = ceil(intval($count) / $per_page);
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
         $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
         $data = [
