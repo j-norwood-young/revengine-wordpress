@@ -25,7 +25,6 @@ class RevEngineAPI {
             'revengine_options',
             __('RevEngine API', 'revengine-api'),
             __('RevEngine API', 'revengine-api'),
-            // an admin-level user.
             'manage_options',
             'revengine-api-options',
             [ $this, 'admin_options_template' ]
@@ -186,10 +185,6 @@ class RevEngineAPI {
     }
 
     function get_woocommerce_orders(WP_REST_Request $request) {
-        function isSerialized($str) {
-            return ($str == serialize(false) || @unserialize($str) !== false);
-        }
-        global $wpdb;
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $offset = ($page - 1) * $per_page;
@@ -231,6 +226,59 @@ class RevEngineAPI {
                 );
             }
             $result[] = $order_data;
+        }
+        $count = intval($orders->total);
+        $page_count = ceil(intval($count) / $per_page);
+        $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
+        $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
+        $data = [
+            "page" => $page,
+            "per_page" => $per_page,
+            "page_count" => $page_count,
+            "total_count" => $count,
+        ];
+        if ($page > 1) {
+            $data["prev"] = $prev_url;
+        }
+        if ($page < $page_count) {
+            $data["next"] = $next_url;
+        }
+        $data["data"] = $result;
+        return $data;
+    }
+
+    function get_woocommerce_subscriptions(WP_REST_Request $request) {
+        $per_page = intval($request->get_param( "per_page") ?? 10);
+        $page = intval($request->get_param( "page") ?? 1);
+        $offset = ($page - 1) * $per_page;
+        $result = [];
+        $args = array(
+            "paginate" => true,
+            "orderby" => "modified",
+            "order" => "DESC",
+            "return" => "ids",
+            "subscriptions_per_page" => $per_page,
+            "offset" => $offset,
+        );
+        $subscription_data["products"] = [];
+        $subscriptions = wcs_get_subscriptions( $args );
+        foreach($subscriptions as $subscription) {
+            $subscription_data = $subscription->get_data();
+            if ($subscription_data["parent_id"]) {
+                $order = wc_get_order($subscription_data["parent_id"]);
+                if ($order) {
+                    $items = $order->get_items();
+                    foreach ($items  as $item ) {
+                        $product = $item->get_product();
+                        $subscription_data["products"][] = array(
+                            "name" => $product->get_name(),
+                            "quantity" => $item->get_quantity(),
+                            "total" => $item->get_total(),
+                        );
+                    }
+                }
+            }
+            $result[] = $subscription_data;
         }
         $count = intval($orders->total);
         $page_count = ceil(intval($count) / $per_page);
