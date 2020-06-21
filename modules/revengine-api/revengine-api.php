@@ -185,49 +185,52 @@ class RevEngineAPI {
     }
 
     function get_woocommerce_orders(WP_REST_Request $request) {
+        $filtered_fields = [
+            "id",
+            "date_created",
+            "date_modified",
+            "date_completed",
+            "date_paid",
+            "total",
+            "customer_id",
+            "order_key",
+            "user",
+            "payment_method",
+            "customer_ip_address",
+            "customer_user_agent",
+            "products",
+        ];
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
-        $offset = ($page - 1) * $per_page;
-        $result = [];
-        $args = array(
-            "paginate" => true,
-            "orderby" => "modified",
-            "order" => "DESC",
-            "return" => "ids",
-            "limit" => $per_page,
-            "offset" => $offset,
-            'type' => 'shop_order'
-        );
-        $orders = wc_get_orders( $args );
-        foreach($orders->orders as $order_id) {
-            $order = wc_get_order( $order_id );
-            $order_data = array(
-                "id" => $order->get_id(),
-                "date_created" => null,
-                "date_modified" => null,
-                "date_completed" => null,
-                "date_paid" => null,
-                "total" => $order->get_total(),
-                "customer_id" => $order->get_customer_id(),
-                "order_key" => $order->get_order_key(),
-                "user" => $order->get_user(),
-                "payment_method" => $order->get_payment_method(),
-                "customer_ip_address" => $order->get_customer_ip_address(),
-                "customer_user_agent" => $order->get_customer_user_agent(),
-                "products" => [],
+        $args = ([
+            'post_type'   => 'shop_order',
+            'posts_per_page' => $per_page,
+            'offset'      => ($page - 1) * $per_page,
+            'order'       => 'ASC',
+            'orderby'     => "modified",
+            'no_found_rows' => false,
+            "post_status" => array("any"),
+            'fields'         => 'ids',
+        ]);
+        if (!empty($request->get_param( "modified_after"))) {
+            $args["date_query"] = array(
+                array(
+                    'column'     => 'post_modified_gmt',
+                    'after'      => $request->get_param( "modified_after"),
+                ),
             );
-            if ($order->get_date_created()) {
-                $order_data["date_created"] = $order->get_date_created()->getTimestamp();
-            }
-            if ($order->get_date_modified()) {
-                $order_data["date_modified"] = $order->get_date_modified()->getTimestamp();
-            }
-            if ($order->get_date_completed()) {
-                $order_data["date_completed"] = $order->get_date_completed()->getTimestamp();
-            }
-            if ($order->get_date_paid()) {
-                $order_data["date_paid"] = $order->get_date_paid()->getTimestamp();
-            }
+        }
+        $wp_query = new WP_Query($args);
+        $posts = $wp_query->posts;
+        $count = intval($wp_query->found_posts);
+        $page_count = ceil(intval($count) / $per_page);
+        if ( empty( $posts ) ) {
+            return null;
+        }
+        $result = [];
+        foreach ($posts as $post) {
+            $order = wc_get_order( $post );
+            $order_data = $order->get_data();
             $items = $order->get_items();
             foreach ($items  as $item ) {
                 $product = $item->get_product();
@@ -237,10 +240,19 @@ class RevEngineAPI {
                     "total" => $item->get_total(),
                 );
             }
-            $result[] = $order_data;
+            $filtered_order_data = [];
+            foreach($order_data as $key => $val) {
+                if (in_array($key, $filtered_fields)) {
+                    $filtered_order_data[$key] = $val;
+                }
+            }
+            foreach($filtered_order_data as $key => $val) {
+                if (get_class($val) === "WC_DateTime") {
+                    $filtered_order_data[$key] = $val->getTimestamp();
+                }
+            }
+            $result[] = $filtered_order_data;
         }
-        $count = intval($orders->total);
-        $page_count = ceil(intval($count) / $per_page);
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
         $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
         $data = [
