@@ -203,10 +203,10 @@ class RevEngineAPI {
             $order = wc_get_order( $order_id );
             $order_data = array(
                 "id" => $order->get_id(),
-                "date_created" => $order->get_date_created(),
-                "date_modified" => $order->get_date_modified(),
-                "date_completed" => $order->get_date_completed(),
-                "date_paid" => $order->get_date_paid(),
+                "date_created" => null,
+                "date_modified" => null,
+                "date_completed" => null,
+                "date_paid" => null,
                 "total" => $order->get_total(),
                 "customer_id" => $order->get_customer_id(),
                 "order_key" => $order->get_order_key(),
@@ -216,6 +216,18 @@ class RevEngineAPI {
                 "customer_user_agent" => $order->get_customer_user_agent(),
                 "products" => [],
             );
+            if ($order->get_date_created()) {
+                $order_data["date_created"] = $order->get_date_created()->getTimestamp();
+            }
+            if ($order->get_date_modified()) {
+                $order_data["date_modified"] = $order->get_date_modified()->getTimestamp();
+            }
+            if ($order->get_date_completed()) {
+                $order_data["date_completed"] = $order->get_date_completed()->getTimestamp();
+            }
+            if ($order->get_date_paid()) {
+                $order_data["date_paid"] = $order->get_date_paid()->getTimestamp();
+            }
             $items = $order->get_items();
             foreach ($items  as $item ) {
                 $product = $item->get_product();
@@ -248,21 +260,63 @@ class RevEngineAPI {
     }
 
     function get_woocommerce_subscriptions(WP_REST_Request $request) {
+        $filtered_fields = [
+            "id",
+            "status",
+            "date_created",
+            "date_modified",
+            "date_completed",
+            "schedule_start",
+            "scedule_cancelled",
+            "schedule_next_payment",
+            "schedule_payment_retry",
+            "date_paid",
+            "total",
+            "customer_id",
+            "order_key",
+            "payment_method",
+            "customer_ip_address",
+            "customer_user_agent",
+            "created_via",
+            "customer_note",
+            "billing_period",
+            "billing_interval",
+            "suspension_count",
+            "requires_manual_renewal",
+            "cancelled_email_sent",
+            "products",
+            "meta_data"
+        ];
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
-        $offset = ($page - 1) * $per_page;
+        $args = ([
+            'post_type'   => 'shop_subscription',
+            'posts_per_page' => $per_page,
+            'offset'      => ($page - 1) * $per_page,
+            'order'       => 'ASC',
+            'orderby'     => "modified",
+            'no_found_rows' => false,
+            "post_status" => array("any"),
+            'fields'         => 'ids',
+        ]);
+        if (!empty($request->get_param( "modified_after"))) {
+            $args["date_query"] = array(
+                array(
+                    'column'     => 'post_modified_gmt',
+                    'after'      => $request->get_param( "modified_after"),
+                ),
+            );
+        }
+        $wp_query = new WP_Query($args);
+        $posts = $wp_query->posts;
+        $count = intval($wp_query->found_posts);
+        $page_count = ceil(intval($count) / $per_page);
+        if ( empty( $posts ) ) {
+            return null;
+        }
         $result = [];
-        $args = array(
-            "paginate" => true,
-            "orderby" => "modified",
-            "order" => "DESC",
-            "return" => "ids",
-            "subscriptions_per_page" => $per_page,
-            "offset" => $offset,
-        );
-        $subscription_data["products"] = [];
-        $subscriptions = wcs_get_subscriptions( $args );
-        foreach($subscriptions as $subscription) {
+        foreach ($posts as $post) {
+            $subscription = wcs_get_subscription( $post );
             $subscription_data = $subscription->get_data();
             if ($subscription_data["parent_id"]) {
                 $order = wc_get_order($subscription_data["parent_id"]);
@@ -278,10 +332,19 @@ class RevEngineAPI {
                     }
                 }
             }
-            $result[] = $subscription_data;
+            $filtered_subscription_data = [];
+            foreach($subscription_data as $key => $val) {
+                if (in_array($key, $filtered_fields)) {
+                    $filtered_subscription_data[$key] = $val;
+                }
+            }
+            foreach($filtered_subscription_data as $key => $val) {
+                if (get_class($val) === "WC_DateTime") {
+                    $filtered_subscription_data[$key] = $val->getTimestamp();
+                }
+            }
+            $result[] = $filtered_subscription_data;
         }
-        $count = intval($orders->total);
-        $page_count = ceil(intval($count) / $per_page);
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
         $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
         $data = [
