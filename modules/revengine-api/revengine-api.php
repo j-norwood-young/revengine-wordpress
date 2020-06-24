@@ -257,7 +257,7 @@ class RevEngineAPI {
                     }
                 }
                 $result[] = $filtered_order_data;
-            } catch($err) {
+            } catch(Exception $err) {
                 trigger_error($err, E_USER_WARNING);
             }
         }
