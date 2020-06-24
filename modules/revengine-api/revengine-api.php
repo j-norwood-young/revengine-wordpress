@@ -234,11 +234,13 @@ class RevEngineAPI {
             $items = $order->get_items();
             foreach ($items  as $item ) {
                 $product = $item->get_product();
-                $order_data["products"][] = array(
-                    "name" => $product->get_name(),
-                    "quantity" => $item->get_quantity(),
-                    "total" => $item->get_total(),
-                );
+                if ($product) {
+                    $order_data["products"][] = array(
+                        "name" => $product->get_name(),
+                        "quantity" => $item->get_quantity(),
+                        "total" => $item->get_total(),
+                    );
+                }
             }
             $filtered_order_data = [];
             foreach($order_data as $key => $val) {
@@ -248,7 +250,7 @@ class RevEngineAPI {
             }
             foreach($filtered_order_data as $key => $val) {
                 if (get_class($val) === "WC_DateTime") {
-                    $filtered_order_data[$key] = $val->getTimestamp();
+                    $filtered_order_data[$key] = $val->date("c");
                 }
             }
             $result[] = $filtered_order_data;
@@ -354,7 +356,7 @@ class RevEngineAPI {
             }
             foreach($filtered_subscription_data as $key => $val) {
                 if ((gettype($val) === "object") && (get_class($val) === "WC_DateTime")) {
-                    $filtered_subscription_data[$key] = $val->getTimestamp();
+                    $filtered_subscription_data[$key] = $val->date("c");
                 }
             }
             $result[] = $filtered_subscription_data;
