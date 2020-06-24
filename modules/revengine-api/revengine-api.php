@@ -229,33 +229,37 @@ class RevEngineAPI {
         }
         $result = [];
         foreach ($posts as $post) {
-            $order = wc_get_order( $post );
-            $order_data = $order->get_data();
-            $items = $order->get_items();
-            if ($items) {
-                foreach ($items  as $item ) {
-                    $product = $item->get_product();
-                    if ($product) {
-                        $order_data["products"][] = array(
-                            "name" => $product->get_name(),
-                            "quantity" => $item->get_quantity(),
-                            "total" => $item->get_total(),
-                        );
+            try {
+                $order = wc_get_order( $post );
+                $order_data = $order->get_data();
+                $items = $order->get_items();
+                if ($items) {
+                    foreach ($items  as $item ) {
+                        $product = $item->get_product();
+                        if ($product) {
+                            $order_data["products"][] = array(
+                                "name" => $product->get_name(),
+                                "quantity" => $item->get_quantity(),
+                                "total" => $item->get_total(),
+                            );
+                        }
                     }
                 }
-            }
-            $filtered_order_data = [];
-            foreach($order_data as $key => $val) {
-                if (in_array($key, $filtered_fields)) {
-                    $filtered_order_data[$key] = $val;
+                $filtered_order_data = [];
+                foreach($order_data as $key => $val) {
+                    if (in_array($key, $filtered_fields)) {
+                        $filtered_order_data[$key] = $val;
+                    }
                 }
-            }
-            foreach($filtered_order_data as $key => $val) {
-                if (get_class($val) === "WC_DateTime") {
-                    $filtered_order_data[$key] = $val->date("c");
+                foreach($filtered_order_data as $key => $val) {
+                    if (get_class($val) === "WC_DateTime") {
+                        $filtered_order_data[$key] = $val->date("c");
+                    }
                 }
+                $result[] = $filtered_order_data;
+            } catch($err) {
+                trigger_error($err, E_USER_WARNING);
             }
-            $result[] = $filtered_order_data;
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
         $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
