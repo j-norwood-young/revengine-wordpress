@@ -56,7 +56,10 @@ class PianoComposer {
         }
         if ($post_type === "article") {
             $options["author"] = get_the_author_meta("display_name");
-            $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "article_tag"));
+            $tags = get_the_terms($post_id, "article_tag");
+            if ($tags) {
+                $options["tags"] = array_map(function($i) { return $i->name; }, $tags);
+            }
             $sections = get_the_terms($post_id, "section");
             if ($sections) {
                 $options["sections"] = array_map(function($i) { return $i->name; }, $sections);
