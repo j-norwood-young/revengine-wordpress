@@ -232,14 +232,16 @@ class RevEngineAPI {
             $order = wc_get_order( $post );
             $order_data = $order->get_data();
             $items = $order->get_items();
-            foreach ($items  as $item ) {
-                $product = $item->get_product();
-                if ($product) {
-                    $order_data["products"][] = array(
-                        "name" => $product->get_name(),
-                        "quantity" => $item->get_quantity(),
-                        "total" => $item->get_total(),
-                    );
+            if ($items) {
+                foreach ($items  as $item ) {
+                    $product = $item->get_product();
+                    if ($product) {
+                        $order_data["products"][] = array(
+                            "name" => $product->get_name(),
+                            "quantity" => $item->get_quantity(),
+                            "total" => $item->get_total(),
+                        );
+                    }
                 }
             }
             $filtered_order_data = [];
