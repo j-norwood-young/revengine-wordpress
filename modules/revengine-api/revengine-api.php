@@ -336,11 +336,13 @@ class RevEngineAPI {
                     $items = $order->get_items();
                     foreach ($items  as $item ) {
                         $product = $item->get_product();
-                        $subscription_data["products"][] = array(
-                            "name" => $product->get_name(),
-                            "quantity" => $item->get_quantity(),
-                            "total" => $item->get_total(),
-                        );
+                        if ($product) {
+                            $subscription_data["products"][] = array(
+                                "name" => $product->get_name(),
+                                "quantity" => $item->get_quantity(),
+                                "total" => $item->get_total(),
+                            );
+                        }
                     }
                 }
             }
