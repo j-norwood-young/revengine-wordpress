@@ -7,7 +7,7 @@
     <form method="post" action="options.php">
         <?php settings_fields( 'revengine-options-group' ); ?>
         <?php do_settings_sections( 'revengine-options-group' ); ?>
-        <h2><?= _("RevEngine Settings", "revengine-settings") ?></h2>
+        <h2>RevEngine Settings</h2>
         <hr>
         <table class="form-table">
             <tbody>
