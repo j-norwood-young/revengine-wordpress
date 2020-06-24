@@ -351,7 +351,7 @@ class RevEngineAPI {
                 }
             }
             foreach($filtered_subscription_data as $key => $val) {
-                if (get_class($val) === "WC_DateTime") {
+                if ((gettype($val) === "object") && (get_class($val) === "WC_DateTime")) {
                     $filtered_subscription_data[$key] = $val->getTimestamp();
                 }
             }
