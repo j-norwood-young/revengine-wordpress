@@ -64,6 +64,36 @@ class RevEngineAPI {
         ) );
     }
 
+    function filter_fields($data, $filtered_fields) {
+        $result = [];
+        foreach($data as $key => $val) {
+            if (in_array($key, $filtered_fields)) {
+                $result[$key] = $val;
+            }
+        }
+        return $result;
+    }
+
+    function isSerialized($str) {
+        return ($str == serialize(false) || @unserialize($str) !== false);
+    }
+
+    function normalise_fields($data) {
+        $result = [];
+        $start_unix_time = strtotime("1900-01-01");
+        $end_unix_time = strtotime("2100-01-01");
+        $data = (array) $data;
+        foreach($data as $key => $val) {
+            $lowercase_key = strtolower($key);
+            if ((gettype($val) === "object") && (get_class($val) === "WC_DateTime")) {
+                $result[$lowercase_key] = $val->date("c");
+            } else {
+                $result[$lowercase_key] = $val;
+            }
+        }
+        return $result;
+    }
+
     function check_access(WP_REST_Request $request) {
         $headers = getallheaders();
         $authorization = "";
@@ -83,6 +113,7 @@ class RevEngineAPI {
     }
 
     function get_posts(WP_REST_Request $request) {
+        global $wp;
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $args = ([
@@ -144,10 +175,51 @@ class RevEngineAPI {
     }
 
     function get_users(WP_REST_Request $request) {
-        function isSerialized($str) {
-            return ($str == serialize(false) || @unserialize($str) !== false);
-        }
         global $wpdb;
+        global $wp;
+        $filtered_fields = [
+            "id",
+            "billing_phone",
+            "current_login",
+            "description",
+            "display_name",
+            "dm-ad-free-interacted",
+            "dm-ad-free-toggle",
+            "dm-status-user",
+            "facebook",
+            "first_name",
+            "followAuthor",
+            "followedAuthors",
+            "followAuthorNotice",
+            "gender",
+            "googleplus",
+            "last_login",
+            "last_name",
+            "last_update",
+            "nickname",
+            "paying_customer",
+            "rs_saved_for_later",
+            "saveForLaterNotice",
+            "session_tokens",
+            "twitter",
+            "user_dob",
+            "user_email",
+            "user_facebook",
+            "user_industry",
+            "user_linkedin",
+            "user_login",
+            "user_nicename",
+            "user_pass",
+            "user_registered",
+            "user_status",
+            "user_twitter",
+            "user_url",
+            "wc_last_active",
+            "wp_capabilities",
+            "wp_user_level",
+            "wsl_current_provider",
+            "wsl_current_user_image",
+        ];
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $result = [];
@@ -156,14 +228,19 @@ class RevEngineAPI {
         $page_count = ceil(intval($count) / $per_page);
         $offset = ($page - 1) * $per_page;
         $sql = "SELECT * FROM wp_users LIMIT $per_page OFFSET $offset";
-        $users = $wpdb->get_results($sql);
+        $users = (array) $wpdb->get_results($sql);
         foreach($users as $user) {
             $sql = "SELECT * FROM wp_usermeta WHERE user_id={$user->ID}";
-            $usermeta = $wpdb->get_results($sql);
-            foreach($usermeta as $meta) {
-                $val = isSerialized($meta->meta_value) ? unserialize($meta->meta_value) : $meta->meta_value;
+            $user_meta = $wpdb->get_results($sql);
+            foreach($user_meta as $meta) {
+                $val = $this->isSerialized($meta->meta_value) ? 
+                    unserialize($meta->meta_value) : 
+                    $meta->meta_value;
                 $user->{$meta->meta_key} = $val;
             }
+            // print_r($user);
+            $user = $this->normalise_fields($user);
+            $user = $this->filter_fields($user, $filtered_fields);
             $result[] = $user;
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
@@ -185,6 +262,7 @@ class RevEngineAPI {
     }
 
     function get_woocommerce_orders(WP_REST_Request $request) {
+        global $wp;
         $filtered_fields = [
             "id",
             "date_created",
@@ -245,18 +323,9 @@ class RevEngineAPI {
                         }
                     }
                 }
-                $filtered_order_data = [];
-                foreach($order_data as $key => $val) {
-                    if (in_array($key, $filtered_fields)) {
-                        $filtered_order_data[$key] = $val;
-                    }
-                }
-                foreach($filtered_order_data as $key => $val) {
-                    if ((gettype($val) === "object") && (get_class($val) === "WC_DateTime")) {
-                        $filtered_order_data[$key] = $val->date("c");
-                    }
-                }
-                $result[] = $filtered_order_data;
+                $order_data = $this->filter_fields($order_data, $filtered_fields);
+                $order_data = $this->normalise_fields($order_data);
+                $result[] = $order_data;
             } catch(Exception $err) {
                 trigger_error($err, E_USER_WARNING);
             }
@@ -280,6 +349,7 @@ class RevEngineAPI {
     }
 
     function get_woocommerce_subscriptions(WP_REST_Request $request) {
+        global $wp;
         $filtered_fields = [
             "id",
             "status",
