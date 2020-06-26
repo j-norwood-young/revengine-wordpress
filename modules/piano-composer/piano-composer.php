@@ -72,7 +72,10 @@ class PianoComposer {
             }
         } else if ($post_type === "opinion-piece") {
             $options["author"] = get_the_author_meta("display_name");
-            $options["tags"] = array_map(function($i) { return $i->name; }, get_the_terms($post_id, "opinion-piece-tag"));
+            $tags = get_the_terms($post_id, "opinion-piece-tag");
+            if ($tags) {
+                $options["tags"] = array_map(function($i) { return $i->name; }, $tags);
+            }
             $options["sections"] = ["opinionista"];
         }
         foreach($this->options as $option) {
