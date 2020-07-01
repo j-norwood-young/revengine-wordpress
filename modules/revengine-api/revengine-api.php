@@ -94,6 +94,13 @@ class RevEngineAPI {
         return $result;
     }
 
+    function convert_to_date($d) {
+        if (is_numeric($d)) {
+            return date("c", $d);
+        }
+        return date("c", strtotime($d));
+    }
+
     function check_access(WP_REST_Request $request) {
         $headers = getallheaders();
         $authorization = "";
@@ -220,6 +227,13 @@ class RevEngineAPI {
             "wsl_current_provider",
             "wsl_current_user_image",
         ];
+        $date_fields = [
+            "last_update",
+            "last_login",
+            "current_login",
+            "wc_last_active",
+            "user_registered"
+        ];
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $result = [];
@@ -241,6 +255,11 @@ class RevEngineAPI {
             // print_r($user);
             $user = $this->normalise_fields($user);
             $user = $this->filter_fields($user, $filtered_fields);
+            foreach($date_fields as $date_field) {
+                if ($user[$date_field]) {
+                    $user[$date_field] = $this->convert_to_date($user[$date_field]);
+                }
+            }
             $result[] = $user;
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
