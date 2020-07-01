@@ -95,6 +95,7 @@ class RevEngineAPI {
     }
 
     function convert_to_date($d) {
+        if ($d == "0000-00-00 00:00:00") return "";
         if (is_numeric($d)) {
             return date("c", $d);
         }
