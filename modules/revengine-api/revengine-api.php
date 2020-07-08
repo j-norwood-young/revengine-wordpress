@@ -565,8 +565,8 @@ class RevEngineAPI {
                 $post->order = $this->normalise_fields($this->filter_fields($order->get_data(), $this->order_filtered_fields));
                 $product = wc_get_product($post->_product_id);
                 $post->product = $this->normalise_fields($this->filter_fields($product->get_data(), $this->product_filtered_fields));
-                $post = $this->filter_fields($post, $this->membership_filtered_fields);
                 $post = $this->normalise_fields($post);
+                $post = $this->filter_fields($post, $this->membership_filtered_fields);
                 $result[] = $post;
             } catch(Exception $err) {
                 trigger_error($err, E_USER_WARNING);
