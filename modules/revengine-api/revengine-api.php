@@ -550,21 +550,26 @@ class RevEngineAPI {
                 $post->start_date = $post->_start_date;
                 $post->end_date = $post->_end_date;
                 $post->cancelled_date = $post->_cancelled_date;
-                $post->paused_intervals = [];
-                foreach ($post->_paused_intervals as $start => $end) {
-                    $obj = new StdClass();
-                    $obj->start = $this->convert_to_date($start);
-                    if ($end) {
-                        $obj->end = $this->convert_to_date($end);
+                if (is_object($post->_paused_intervals)) {
+                    foreach ($post->_paused_intervals as $start => $end) {
+                        $obj = new StdClass();
+                        $obj->start = $this->convert_to_date($start);
+                        if ($end) {
+                            $obj->end = $this->convert_to_date($end);
+                        }
+                        $post->paused_intervals[] = $obj;
                     }
-                    $post->paused_intervals[] = $obj;
                 }
                 $post->date_created = $post->post_date_gmt;
                 $post->date_modified = $post->post_modified_gmt;
                 $order = wc_get_order( $post->_order_id );
-                $post->order = $this->normalise_fields($this->filter_fields($order->get_data(), $this->order_filtered_fields));
+                if ($order) {
+                    $post->order = $this->normalise_fields($this->filter_fields($order->get_data(), $this->order_filtered_fields));
+                }
                 $product = wc_get_product($post->_product_id);
-                $post->product = $this->normalise_fields($this->filter_fields($product->get_data(), $this->product_filtered_fields));
+                if ($product) {
+                    $post->product = $this->normalise_fields($this->filter_fields($product->get_data(), $this->product_filtered_fields));
+                }
                 $post = $this->normalise_fields($post);
                 $post = $this->filter_fields($post, $this->membership_filtered_fields);
                 $result[] = $post;
