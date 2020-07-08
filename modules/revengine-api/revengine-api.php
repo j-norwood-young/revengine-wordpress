@@ -550,7 +550,8 @@ class RevEngineAPI {
                 $post->start_date = $post->_start_date;
                 $post->end_date = $post->_end_date;
                 $post->cancelled_date = $post->_cancelled_date;
-                if (is_object($post->_paused_intervals)) {
+                $post->paused_intervals = [];
+                if (gettype($post->_paused_intervals) === "array") {
                     foreach ($post->_paused_intervals as $start => $end) {
                         $obj = new StdClass();
                         $obj->start = $this->convert_to_date($start);
