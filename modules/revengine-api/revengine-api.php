@@ -69,6 +69,7 @@ class RevEngineAPI {
         "start_date",
         "end_date",
         "cancelled_date",
+        "paused_date",
         "paused_intervals",
         "date_created",
         "date_modified",
@@ -559,6 +560,9 @@ class RevEngineAPI {
                             $obj->end = $this->convert_to_date($end);
                         }
                         $post->paused_intervals[] = $obj;
+                    }
+                    if (!$end) {
+                        $post->paused_date = $this->convert_to_date($start);
                     }
                 }
                 $post->date_created = $post->post_date_gmt;
