@@ -206,12 +206,16 @@ class RevEngineAPI {
             } else {
                 $result[$lowercase_key] = $val;
             }
+            if (strpos($key, "date") !== false) {
+                $result[$key] = $this->convert_to_date($val);
+            }
         }
         return $result;
     }
 
     function convert_to_date($d) {
         if ($d == "0000-00-00 00:00:00") return "";
+        if ($d == "") return "";
         if (is_numeric($d)) {
             return date("c", $d);
         }
