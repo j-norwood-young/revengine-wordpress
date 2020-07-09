@@ -268,7 +268,7 @@ class RevEngineAPI {
         $count = intval($wp_query->found_posts);
         $page_count = ceil(intval($count) / $per_page);
         if ( empty( $posts ) ) {
-            return null;
+            $posts = [];
         }
         $result = [];
         foreach ($posts as $key => $post) {
@@ -385,7 +385,7 @@ class RevEngineAPI {
         $count = intval($wp_query->found_posts);
         $page_count = ceil(intval($count) / $per_page);
         if ( empty( $posts ) ) {
-            return null;
+            $posts = [];
         }
         $result = [];
         foreach ($posts as $post) {
@@ -457,7 +457,7 @@ class RevEngineAPI {
         $count = intval($wp_query->found_posts);
         $page_count = ceil(intval($count) / $per_page);
         if ( empty( $posts ) ) {
-            return null;
+            $posts = [];
         }
         $result = [];
         foreach ($posts as $post) {
@@ -537,7 +537,7 @@ class RevEngineAPI {
         $count = intval($wp_query->found_posts);
         $page_count = ceil(intval($count) / $per_page);
         if ( empty( $posts ) ) {
-            return null;
+            $posts = [];
         }
         $result = [];
         foreach ($posts as $post) {
