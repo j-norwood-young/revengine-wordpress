@@ -153,9 +153,9 @@ class RevEngineAPI {
     }
 
     function register_api_routes() {
-        register_rest_route( 'revengine/v1', '/posts', array(
+        register_rest_route( 'revengine/v1', '/articles', array(
             'methods' => 'GET',
-            'callback' => [$this, 'get_posts'],
+            'callback' => [$this, 'get_articles'],
             'permission_callback' => [$this, 'check_access']
         ));
         register_rest_route( 'revengine/v1', '/users', array(
@@ -240,7 +240,7 @@ class RevEngineAPI {
         return false;
     }
 
-    function get_posts(WP_REST_Request $request) {
+    function get_articles(WP_REST_Request $request) {
         global $wp;
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
@@ -273,15 +273,28 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $key => $post) {
             $post->author = get_author_name($post->post_author);
+            $tags = get_the_terms($post->ID, "article_tag");
+            if (is_array($tags)) {
+                $post->tags = array_map(function($i) { return $i->name; }, $tags);
+            } else {
+                $post->tags = [];
+            }
+            $terms = get_the_terms($post->ID, "section");
+            if (is_array($terms)) {
+                $post->sections = array_map(function($i) { return $i->name; }, $terms);
+            } else {
+                $post->sections = [];
+            }
             $result[] = [
                 "author" => $post->author,
                 "date_published" => $post->post_date,
-                "date_updated" => $post->post_modified,
-                "api" => strip_tags($post->post_api),
+                "date_modified" => $post->post_modified,
                 "title" => $post->post_title,
                 "excerpt" => $post->post_excerpt,
                 "urlid" => $post->post_name,
-                "type" => $post->post_type
+                "type" => $post->post_type,
+                "tags" => $post->tags,
+                "sections" => $post->sections
             ];
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
