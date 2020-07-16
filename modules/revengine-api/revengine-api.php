@@ -286,6 +286,7 @@ class RevEngineAPI {
                 $post->sections = [];
             }
             $result[] = [
+                "id" => $post->ID,
                 "author" => $post->author,
                 "date_published" => $post->post_date,
                 "date_modified" => $post->post_modified,
