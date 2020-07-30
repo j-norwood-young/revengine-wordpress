@@ -49,6 +49,14 @@
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row">Enable RevEngine Tracking on AMP pages</th>
+                    <td>
+                        <label for="revengine_tracker_amp">
+                            <input name="revengine_tracker_amp" type="checkbox" id="revengine_tracker_amp" value="1" <?= (get_option("revengine_tracker_amp")) ? 'checked="checked"' : "" ?>>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row">Use IFrame Method</th>
                     <td>
                         <label for="revengine_tracker_iframe">

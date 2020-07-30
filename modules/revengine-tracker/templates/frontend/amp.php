@@ -1,0 +1,1 @@
+<amp-pixel src="<?= $revengine_server ?>" layout="nodisplay"></amp-pixel>
