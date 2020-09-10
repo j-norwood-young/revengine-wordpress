@@ -290,6 +290,17 @@ class RevEngineAPI {
             } else {
                 $post->sections = [];
             }
+            $featured = false;
+            $flags = get_the_terms($post->ID, "flag");
+            $position = null;
+            if (is_array($flags)) {
+                foreach ($flags as $key => $flag) {
+                    if ($flag->slug === "featured") {
+                        $featured = true;
+                        $position = intval(get_post_meta($post->ID, 'dm-frontpage-main-ordering')[0]);
+                    }
+                }
+            }
             $result[] = [
                 "post_id" => $post->ID,
                 "author" => $post->author,
@@ -300,7 +311,9 @@ class RevEngineAPI {
                 "urlid" => $post->post_name,
                 "type" => $post->post_type,
                 "tags" => $post->tags,
-                "sections" => $post->sections
+                "sections" => $post->sections,
+                "featured" => $featured,
+                "position" => $position
             ];
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
