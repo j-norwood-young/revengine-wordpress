@@ -163,6 +163,11 @@ class RevEngineAPI {
             'callback' => [$this, 'get_opinions'],
             'permission_callback' => [$this, 'check_access']
         ));
+        register_rest_route( 'revengine/v1', '/featured', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_featured'],
+            'permission_callback' => [$this, 'check_access']
+        ));
         register_rest_route( 'revengine/v1', '/users', array(
             'methods' => 'GET',
             'callback' => [$this, 'get_users'],
@@ -245,12 +250,10 @@ class RevEngineAPI {
         return false;
     }
 
-    function get_articles(WP_REST_Request $request) {
+    private function get_content($post_type, $per_page, $page, $modified_after) {
         global $wp;
-        $per_page = intval($request->get_param( "per_page") ?? 10);
-        $page = intval($request->get_param( "page") ?? 1);
         $args = ([
-            'post_type'   => 'article',
+            'post_type'   => $post_type,
             'post_status' => 'publish',
             'perm'        => 'readable',
             'posts_per_page' => $per_page,
@@ -260,11 +263,11 @@ class RevEngineAPI {
             "ignore_sticky_posts" => true,
             'no_found_rows' => false
         ]);
-        if (!empty($request->get_param( "modified_after"))) {
+        if (!empty($modified_after)) {
             $args["date_query"] = array(
                 array(
                     'column'     => 'post_modified_gmt',
-                    'after'      => $request->get_param( "modified_after"),
+                    'after'      => $modified_after,
                 ),
             );
         }
@@ -278,7 +281,7 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $key => $post) {
             $post->author = get_author_name($post->post_author);
-            $tags = get_the_terms($post->ID, "article_tag");
+            $tags = get_the_terms($post->ID, $post_type . "_tag");
             if (is_array($tags)) {
                 $post->tags = array_map(function($i) { return $i->name; }, $tags);
             } else {
@@ -334,40 +337,35 @@ class RevEngineAPI {
         return $data;
     }
 
+    function get_articles(WP_REST_Request $request) {
+        global $wp;
+        $per_page = intval($request->get_param( "per_page") ?? 10);
+        $page = intval($request->get_param( "page") ?? 1);
+        $modified_after = $request->get_param( "modified_after");
+        return $this->get_content("article", $per_page, $page, $modified_after);
+    }
+
     function get_opinions(WP_REST_Request $request) {
         global $wp;
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
-        $args = ([
-            'post_type'   => 'opinion-piece',
-            'post_status' => 'publish',
-            'perm'        => 'readable',
-            'posts_per_page' => $per_page,
-            'offset'      => ($page - 1) * $per_page,
-            'order'       => 'ASC',
-            'orderby'     => "modified",
-            "ignore_sticky_posts" => true,
-            'no_found_rows' => false
-        ]);
-        if (!empty($request->get_param( "modified_after"))) {
-            $args["date_query"] = array(
-                array(
-                    'column'     => 'post_modified_gmt',
-                    'after'      => $request->get_param( "modified_after"),
-                ),
-            );
-        }
+        $modified_after = $request->get_param( "modified_after");
+        return $this->get_content("opinion-piece", $per_page, $page, $modified_after);
+    }
+
+    function get_featured(WP_REST_Request $request) {
+        $homepage = getHomePagePosts();
         $wp_query = new WP_Query($args);
-        $posts = $wp_query->posts;
-        $count = intval($wp_query->found_posts);
-        $page_count = ceil(intval($count) / $per_page);
+        $post_ids = $homepage["posts"];
+        $count = intval($homepage["featuredPostCount"]);
         if ( empty( $posts ) ) {
             $posts = [];
         }
         $result = [];
-        foreach ($posts as $key => $post) {
+        foreach ($post_ids as $post_id) {
+            $post = get_post($post_id);
             $post->author = get_author_name($post->post_author);
-            $tags = get_the_terms($post->ID, "opinion-piece-tag");
+            $tags = get_the_terms($post->ID, $post_type . "_tag");
             if (is_array($tags)) {
                 $post->tags = array_map(function($i) { return $i->name; }, $tags);
             } else {
@@ -379,6 +377,17 @@ class RevEngineAPI {
             } else {
                 $post->sections = [];
             }
+            $featured = false;
+            $flags = get_the_terms($post->ID, "flag");
+            $position = null;
+            if (is_array($flags)) {
+                foreach ($flags as $key => $flag) {
+                    if ($flag->slug === "featured") {
+                        $featured = true;
+                        $position = intval(get_post_meta($post->ID, 'dm-frontpage-main-ordering')[0]);
+                    }
+                }
+            }
             $result[] = [
                 "post_id" => $post->ID,
                 "author" => $post->author,
@@ -389,23 +398,14 @@ class RevEngineAPI {
                 "urlid" => $post->post_name,
                 "type" => $post->post_type,
                 "tags" => $post->tags,
-                "sections" => $post->sections
+                "sections" => $post->sections,
+                "featured" => $featured,
+                "position" => $position
             ];
         }
-        $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
-        $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
         $data = [
-            "page" => $page,
-            "per_page" => $per_page,
-            "page_count" => $page_count,
             "total_count" => $count,
         ];
-        if ($page > 1) {
-            $data["prev"] = $prev_url;
-        }
-        if ($page < $page_count) {
-            $data["next"] = $next_url;
-        }
         $data["data"] = $result;
         return $data;
     }
