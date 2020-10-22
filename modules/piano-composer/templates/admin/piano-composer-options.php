@@ -32,6 +32,13 @@
                         <p class="description">Find your key in Piano Compose under "Integrate". It should look like "aid=&lt; your key &gt;". Just leave out the "aid=" bit.</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Exclude URLs</th>
+                    <td>
+                        <input style="width: 600px; height: 40px;" name="revengine_exclude_urls" placeholder="/url1, -url2-, http://blah.com/url3" id="revengine_exclude_urls" value="<?php echo esc_attr( get_option('revengine_exclude_urls') ); ?>">
+                        <p>Comma-separated, eg. "/insider"</p>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <?=	submit_button(); ?>
