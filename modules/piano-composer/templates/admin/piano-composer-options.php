@@ -36,11 +36,11 @@
                     <th scope="row">Exclude URLs</th>
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_exclude_urls" placeholder="/url1, -url2-, http://blah.com/url3" id="revengine_exclude_urls" value="<?php echo esc_attr( get_option('revengine_exclude_urls') ); ?>">
-                        <p>Comma-separated, eg. "/insider,-ignore-me-"</p>
+                        <p>Comma-separated, eg. "/insider,-ignore-me-,/section/sports"</p>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Exclude Sections</th>
+                    <th scope="row">Exclude Section Articles</th>
                     <td>
                         <?php
                         $sections = get_terms("section");
@@ -50,6 +50,7 @@
                         <?php
                         }
                         ?>
+                        <p>Note: Does not include section page, use "Exclude URLs" above</p>
                     </td>
                 </tr>
             </tbody>
