@@ -4,12 +4,15 @@ class PianoComposer {
         "revengine_piano_active",
         "revengine_piano_sandbox_mode",
         "revengine_piano_id",
-        "revengine_exclude_tags",
         "revengine_exclude_urls"
     ];
 
     function __construct($revengine_globals) {
         $this->revengine_globals = &$revengine_globals;
+        $sections = get_terms("section");
+        foreach($sections as $section) {
+            $this->options[] = "revengine_exclude_section_{$section->slug}";
+        }
         add_action('admin_init', [ $this, 'register_settings' ]);
         add_action('admin_menu', [ $this, 'options_page' ]);
         add_action('wp_head', [ $this, 'scripts' ]);
@@ -50,6 +53,18 @@ class PianoComposer {
             }
         }
         return false;
+    }
+
+    private function ignore_section() {
+        $post_id = get_queried_object_id();
+        $sections = wp_get_post_terms($post_id, 'section');
+        $ignore = false;
+        foreach($sections as $section) {
+            if (get_option["revengine_exclude_section_{$section->slug}"]) {
+                $ignore = true;
+            }
+        }
+        return $ignore;
     }
 
     private function get_post_data() {
@@ -93,6 +108,7 @@ class PianoComposer {
 
     function scripts() {
         if ($this->ignore_url()) return;
+        if ($this->ignore_section()) return;
         $post_id = get_queried_object_id();
         $post = get_queried_object();
         if (!empty($post->post_type)) {
@@ -151,6 +167,7 @@ class PianoComposer {
         if (is_admin()) return; // Front end only
         if (is_404()) return; // Don't log 404s
         if ($this->ignore_url()) return;
+        if ($this->ignore_section()) return;
         $post = $this->get_post_data();
         foreach($this->options as $option) {
             $options[$option] = get_option($option);

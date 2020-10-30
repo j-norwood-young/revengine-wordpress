@@ -36,7 +36,20 @@
                     <th scope="row">Exclude URLs</th>
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_exclude_urls" placeholder="/url1, -url2-, http://blah.com/url3" id="revengine_exclude_urls" value="<?php echo esc_attr( get_option('revengine_exclude_urls') ); ?>">
-                        <p>Comma-separated, eg. "/insider"</p>
+                        <p>Comma-separated, eg. "/insider,-ignore-me-"</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Exclude Sections</th>
+                    <td>
+                        <?php
+                        $sections = get_terms("section");
+                        foreach($sections as $section) {
+                        ?>
+                        <input type="checkbox" name="revengine_exclude_section_<?= $section->slug ?>" value="1" <?php checked( '1', get_option( "revengine_exclude_section_{$section->slug}" ) ); ?>><?= $section->name ?><br>
+                        <?php
+                        }
+                        ?>
                     </td>
                 </tr>
             </tbody>
