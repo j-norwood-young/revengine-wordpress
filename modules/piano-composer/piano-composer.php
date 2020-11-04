@@ -60,7 +60,7 @@ class PianoComposer {
         $sections = wp_get_post_terms($post_id, 'section');
         $ignore = false;
         foreach($sections as $section) {
-            if (get_option["revengine_exclude_section_{$section->slug}"]) {
+            if (get_option("revengine_exclude_section_{$section->slug}", false)) {
                 $ignore = true;
             }
         }
