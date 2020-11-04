@@ -49,6 +49,7 @@ class PianoComposer {
         $ignore_array = array_map("trim", explode(",", $ignore_urls));
         foreach ($ignore_array as $ignore_url) {
             if (stripos($url, $ignore_url)) {
+                print_r("<!-- revengine-ignore $url = $ignore_url -->");
                 return true;
             }
         }
@@ -61,6 +62,7 @@ class PianoComposer {
         $ignore = false;
         foreach($sections as $section) {
             if (get_option("revengine_exclude_section_{$section->slug}", false)) {
+                print_r("<!-- revengine_exclude_section_{$section->slug} -->");
                 $ignore = true;
             }
         }
