@@ -109,6 +109,7 @@ class PianoComposer {
     }
 
     function scripts() {
+        print_r("<!-- revengine-piano -->");
         if ($this->ignore_url()) return;
         if ($this->ignore_section()) return;
         $post_id = get_queried_object_id();
