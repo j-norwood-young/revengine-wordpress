@@ -353,17 +353,34 @@ class RevEngineAPI {
         return $this->get_content("opinion-piece", $per_page, $page, $modified_after);
     }
 
+    public function getFeaturedPostsArgs($frontPage = 'main') : array
+    {
+        $metaKey = 'dm-frontpage-' . $frontPage .'-ordering';
+
+        return [
+            'post_type'   => ['article', 'opinion-piece', 'cartoon', 'beatnik-article'],
+            'post_status' => 'publish',
+            'numberposts' => HOMEPAGE_FEATURED_POSTS_DISPLAY_COUNT,
+            'tax_query'   => [
+                'relation' => 'AND',
+                [
+                    'taxonomy' => 'flag',
+                    'field'    => 'slug',
+                    'terms'    => 'featured' . (($frontPage != 'main') ? '-'.$frontPage : '')
+                ],
+                $this->excludeNewsDeck
+            ],
+            'meta_key' => $metaKey,
+            'orderby' => 'meta_value_num',
+            'order' => 'ASC',
+        ];
+    }
+
     function get_featured(WP_REST_Request $request) {
-        $homepage = getHomePagePosts();
-        $wp_query = new WP_Query($args);
-        $post_ids = $homepage["posts"];
-        $count = intval($homepage["featuredPostCount"]);
-        if ( empty( $posts ) ) {
-            $posts = [];
-        }
+        // $homepage = $this->getHomePagePosts();
+        $posts = get_posts($this->getFeaturedPostsArgs());
         $result = [];
-        foreach ($post_ids as $post_id) {
-            $post = get_post($post_id);
+        foreach ($posts as $post) {
             $post->author = get_author_name($post->post_author);
             $tags = get_the_terms($post->ID, $post_type . "_tag");
             if (is_array($tags)) {
@@ -404,7 +421,7 @@ class RevEngineAPI {
             ];
         }
         $data = [
-            "total_count" => $count,
+            "total_count" => count($posts),
         ];
         $data["data"] = $result;
         return $data;
