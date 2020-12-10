@@ -80,15 +80,31 @@ class RevEngineTracker {
         if (isset($_SERVER["HTTP_REFERER"])) {
             $data->referer = $_SERVER["HTTP_REFERER"];
         }
-        if ($post_type == "article" || $post_type == "opinion-piece") { // Empty post types are section pages, home pages etc
+        if ($post_type == "article" || $post_type == "opinion-piece" || $post_type == "post") { // Empty post types are section pages, home pages etc
             $data->post_author = get_the_author_meta("display_name", $post->post_author);
+            // $taxonomies = get_object_taxonomies( $post_type, 'objects' );
+            // print_r($taxonomies);
+            $data->post_sections = [];
             $terms = get_the_terms($post_id, "section");
             if (is_array($terms)) {
-                $data->post_sections = array_map(function($i) { return $i->name; }, $terms);
+                $data->post_sections = array_merge($data->post_sections, array_map(function($i) { return $i->name; }, $terms));
+            }
+            $categories = get_the_terms($post_id, "category");
+            if (is_array($categories)) {
+                $data->post_sections = array_merge($data->post_sections, array_map(function($i) { return $i->name; }, $categories));
+            }
+            $data->post_tags = [];
+            $tags = get_the_terms($post_id, "post_tag");
+            if (is_array($tags)) {
+                $data->post_tags = array_merge($data->post_tags, array_map(function($i) { return $i->name; }, $tags));
             }
             $tags = get_the_terms($post_id, "article_tag");
             if (is_array($tags)) {
-                $data->post_tags = array_map(function($i) { return $i->name; }, $tags);
+                $data->post_tags = array_merge($data->post_tags, array_map(function($i) { return $i->name; }, $tags));
+            }
+            $tags = get_the_terms($post_id, "opinionista_tag");
+            if (is_array($tags)) {
+                $data->post_tags = array_merge($data->post_tags, array_map(function($i) { return $i->name; }, $tags));
             }
         }
         return $data;
@@ -129,6 +145,7 @@ class RevEngineTracker {
         if (is_admin()) return; // Front end only
         if (is_404()) return; // Don't log 404s
         $options = [];
+        // print_r($this->options);
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
         }
@@ -141,9 +158,9 @@ class RevEngineTracker {
             $revengine_server = $options["revengine_tracker_server_address"];
             if ($options["revengine_tracker_ssl"]) {
                 $revengine_server = "https://" . $revengine_server;
-                if ($options["revengine_tracker_server_port"] !== 443 && !empty($options["revengine_tracker_server_port"])) {
-                    $revengine_server = $revengine_server . ":" . $options["revengine_tracker_server_port"];
-                }
+                // if ($options["revengine_tracker_server_port"] !== 443 && !empty($options["revengine_tracker_server_port"])) {
+                //     $revengine_server = $revengine_server . ":" . $options["revengine_tracker_server_port"];
+                // }
             } else {
                 $revengine_server = "http://" . $revengine_server;
                 if ($options["revengine_tracker_server_port"] !== 80 && !empty($options["revengine_tracker_server_port"])) {
