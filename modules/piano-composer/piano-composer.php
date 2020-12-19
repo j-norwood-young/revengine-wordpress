@@ -1,4 +1,5 @@
 <?php
+
 class PianoComposer {
     private $options = [
         "revengine_piano_active",
@@ -9,14 +10,16 @@ class PianoComposer {
 
     function __construct($revengine_globals) {
         $this->revengine_globals = &$revengine_globals;
+        $this->content_data = new RevEngineContentData();
         $sections = get_terms("section");
         foreach($sections as $section) {
             $this->options[] = "revengine_exclude_section_{$section->slug}";
         }
         add_action('admin_init', [ $this, 'register_settings' ]);
         add_action('admin_menu', [ $this, 'options_page' ]);
-        add_action('wp_head', [ $this, 'scripts' ]);
-        add_action('amp_post_template_head', [ $this, 'amp' ]);
+        // add_action('wp_head', [ $this, 'scripts' ]);
+        add_action('wp_footer', [ $this, 'embed_script' ]);
+        // add_action('amp_post_template_head', [ $this, 'amp' ]);
     }
 
     function options_page() {
@@ -108,6 +111,26 @@ class PianoComposer {
         return $result;
     }
 
+    public function embed_script() {
+        //print_r("<!-- revengine-piano -->");
+        if ($this->ignore_url()) return;
+        if ($this->ignore_section()) return;
+        $furl = plugin_dir_url( __FILE__ ) . 'js/piano.php';
+        $revengine_user = [];
+        $revengine_user["logged_in"] = !empty(get_current_user_id());
+        if ( function_exists( 'wc_memberships' ) ) {
+            $memberships = array_map(function($i) { return $i->plan->name; },wc_memberships_get_user_active_memberships());
+            $revengine_user["memberships"] = $memberships;
+        }
+        $post = $this->content_data->get_post_data();
+        foreach($this->options as $option) {
+            $options[$option] = get_option($option);
+        }
+        if (!$options["revengine_piano_active"]) return;
+        $ver = date("ymd-Gis", filemtime($fname));
+        print "<script data-ampdevmode src='$furl?post_id=" . $post->post_id . "&revengine_piano_id=" . $options["revengine_piano_id"] . "&revengine_piano_sandbox_mode=" .$options["revengine_piano_sandbox_mode"]. "&date_published=" .$post->date_published. "&author=" .$post->post_author. "&primary_section=" .$post->primary_section. "&tags=" .$post->post_tags. "&logged_in=" .$revengine_user["logged_in"]. "&memberships=" .$revengine_user["memberships"]. "'></script>";
+    }
+
     function scripts() {
         //print_r("<!-- revengine-piano -->");
         if ($this->ignore_url()) return;
@@ -171,7 +194,7 @@ class PianoComposer {
         if (is_404()) return; // Don't log 404s
         if ($this->ignore_url()) return;
         if ($this->ignore_section()) return;
-        $post = $this->get_post_data();
+        $post = $this->content_data->get_post_data();
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
         }
