@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function revengine_init() {
     $revengine_globals = [];
+    require_once(plugin_basename("includes/revengine-content_data.php"));
     require_once(plugin_basename('includes/revengine-admin.php' ) );
     $revengine_admin = new RevEngineAdmin($revengine_globals);
     // Modules - these should eventually autoload
