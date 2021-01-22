@@ -311,6 +311,7 @@ class RevEngineAPI {
                 "date_modified" => $post->post_modified,
                 "title" => $post->post_title,
                 "excerpt" => $post->post_excerpt,
+                "content" => $post->post_content,
                 "urlid" => $post->post_name,
                 "type" => $post->post_type,
                 "tags" => $post->tags,
