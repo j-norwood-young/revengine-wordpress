@@ -74,7 +74,8 @@ class RevEngineAPI {
         "date_created",
         "date_modified",
         "order",
-        "product"
+        "product",
+        "user"
     ];
 
     private $user_filtered_fields = [
@@ -648,7 +649,7 @@ class RevEngineAPI {
             'order'       => 'ASC',
             'orderby'     => "modified",
             'no_found_rows' => false,
-            "post_status" => array("any")
+            'post_status' => array("any"),
         ]);
         if (!empty($request->get_param( "modified_after"))) {
             $args["date_query"] = array(
@@ -657,6 +658,9 @@ class RevEngineAPI {
                     'after'      => $request->get_param( "modified_after"),
                 ),
             );
+        }
+        if (!empty($request->get_param("status"))) {
+            $args["post_status"] = 'wcm-' . $request->get_param("status");
         }
         $wp_query = new WP_Query($args);
         $posts = $wp_query->posts;
@@ -697,10 +701,19 @@ class RevEngineAPI {
                 }
                 $post->date_created = $post->post_date_gmt;
                 $post->date_modified = $post->post_modified_gmt;
+                // Add order
                 $order = wc_get_order( $post->_order_id );
                 if ($order) {
                     $post->order = $this->normalise_fields($this->filter_fields($order->get_data(), $this->order_filtered_fields));
                 }
+                // Add user
+                $user = get_userdata($post->customer_id);
+                // $post->user = $user;
+                if ($user) {
+                    $post->user = $this->normalise_fields($this->filter_fields($user->data, $this->user_filtered_fields));
+                    // $post->user = $user;
+                }
+                // Add product
                 $product = wc_get_product($post->_product_id);
                 if ($product) {
                     $post->product = $this->normalise_fields($this->filter_fields($product->get_data(), $this->product_filtered_fields));
