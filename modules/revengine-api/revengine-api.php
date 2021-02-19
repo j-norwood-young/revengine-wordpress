@@ -174,6 +174,14 @@ class RevEngineAPI {
             'callback' => [$this, 'get_users'],
             'permission_callback' => [$this, 'check_access']
         ));
+        register_rest_route( 'revengine/v1', '/user/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_users'],
+            'permission_callback' => [$this, 'check_access'],
+            'args' => [
+                'id'
+            ]
+        ));
         register_rest_route( 'revengine/v1', '/woocommerce_orders', array(
             'methods' => 'GET',
             'callback' => [$this, 'get_woocommerce_orders'],
@@ -446,7 +454,12 @@ class RevEngineAPI {
         $count = intval($wpdb->get_results($sql)[0]->count);
         $page_count = ceil(intval($count) / $per_page);
         $offset = ($page - 1) * $per_page;
-        $sql = "SELECT * FROM wp_users LIMIT $per_page OFFSET $offset";
+        if (empty($request->get_param("id"))) {
+            $sql = "SELECT * FROM wp_users LIMIT $per_page OFFSET $offset";
+        } else {
+            $page_count = $count = $offset = 1;
+            $sql = "SELECT * FROM wp_users WHERE ID={$request->get_param('id')}";
+        }
         $users = (array) $wpdb->get_results($sql);
         foreach($users as $user) {
             $sql = "SELECT * FROM wp_usermeta WHERE user_id={$user->ID}";
@@ -562,20 +575,29 @@ class RevEngineAPI {
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $args = ([
-            'post_type'   => 'shop_subscription',
-            'posts_per_page' => $per_page,
-            'offset'      => ($page - 1) * $per_page,
-            'order'       => 'ASC',
-            'orderby'     => "modified",
-            'no_found_rows' => false,
-            "post_status" => array("any"),
-            'fields'         => 'ids',
+            'post_type'         => 'shop_subscription',
+            'posts_per_page'    => $per_page,
+            'offset'            => ($page - 1) * $per_page,
+            'order'             => 'ASC',
+            'orderby'           => "modified",
+            'no_found_rows'     => false,
+            "post_status"       => array("any"),
+            'fields'            => 'ids',
         ]);
-        if (!empty($request->get_param( "modified_after"))) {
+        if (!empty($request->get_param("modified_after"))) {
             $args["date_query"] = array(
                 array(
                     'column'     => 'post_modified_gmt',
                     'after'      => $request->get_param( "modified_after"),
+                ),
+            );
+        }
+        if (!empty($request->get_param("customer_id"))) {
+            $args["meta_query"] = array(
+                array(
+                    'key'     => '_customer_user',
+                    'value'      => $request->get_param("customer_id"),
+                    "compare" => "="
                 ),
             );
         }
