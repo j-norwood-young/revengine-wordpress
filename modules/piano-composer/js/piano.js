@@ -6,6 +6,9 @@ tp.push(["setTags", revengine_piano_composer_vars.tags]);
 tp.push(["setCustomParam", "type", "premium", "content"])
 tp.push(["setCustomVariable", "logged_in", String(!!(revengine_piano_composer_vars.logged_in))]);
 tp.push(["setCustomVariable", "memberships", revengine_piano_composer_vars.memberships]);
+for(let segment in revengine_piano_composer_vars.segments) {
+    tp.push(["setCustomVariable", segment, true]);
+}
 (function(src){
     var a=document.createElement("script");
     a.type="text/javascript";

@@ -33,6 +33,18 @@
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row">RevEngine Segment API Server Address</th>
+                    <td>
+                        <input style="width: 600px; height: 40px;" name="revengine_segment_api_url" placeholder="https://wp_api.revengine.dailymaverick.com" id="revengine_segment_api_url" type="url" value="<?php echo esc_attr( get_option('revengine_segment_api_url') ); ?>">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">RevEngine Segment API Server Cache Duration (Seconds)</th>
+                    <td>
+                        <input style="width: 600px; height: 40px;" name="revengine_segment_api_cache_duration" placeholder="600" id="revengine_segment_api_cache_duration" type="number" min="0" value="<?php echo esc_attr( get_option('revengine_segment_api_cache_duration') ); ?>">
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row">Exclude URLs</th>
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_exclude_urls" placeholder="/url1, -url2-, http://blah.com/url3" id="revengine_exclude_urls" value="<?php echo esc_attr( get_option('revengine_exclude_urls') ); ?>">

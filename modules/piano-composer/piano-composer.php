@@ -4,7 +4,9 @@ class PianoComposer {
         "revengine_piano_active",
         "revengine_piano_sandbox_mode",
         "revengine_piano_id",
-        "revengine_exclude_urls"
+        "revengine_exclude_urls",
+        "revengine_segment_api_url",
+        "revengine_segment_api_cache_duration",
     ];
 
     function __construct($revengine_globals) {
@@ -109,7 +111,6 @@ class PianoComposer {
     }
 
     function scripts() {
-        //print_r("<!-- revengine-piano -->");
         if ($this->ignore_url()) return;
         if ($this->ignore_section()) return;
         $post_id = get_queried_object_id();
@@ -154,10 +155,18 @@ class PianoComposer {
             }
             $options["sections"] = ["opinionista"];
         }
+        // If the user is logged in, fetch their labels and segments from RfvEngine
+        $options["segments"] = [];
+        if (!empty(get_current_user_id())) {
+            $segments = $this->get_segments(get_current_user_id());
+            foreach($segments as $segment) {
+                $segment_name = "segment-" . str_replace(" ", "_", strtolower($segment));
+                $options["segments"][$segment_name] = 1;
+            }
+        }
         foreach($this->options as $option) {
             $options[$option] = get_option($option);
         }
-        // trigger_error(json_encode($options), E_USER_NOTICE);
         if (!$options["revengine_piano_active"]) return;
         $furl = plugin_dir_url( __FILE__ ) . 'js/piano.js';
         $fname = plugin_dir_path( __FILE__ ) . 'js/piano.js';
@@ -165,7 +174,7 @@ class PianoComposer {
         wp_enqueue_script( "revengine-piano-composer", $furl, null, $ver, true );
         wp_localize_script( "revengine-piano-composer", "revengine_piano_composer_vars", $options);
     }
-
+    
     public function amp() {
         if (is_admin()) return; // Front end only
         if (is_404()) return; // Don't log 404s
@@ -179,5 +188,38 @@ class PianoComposer {
         $url = ($options["revengine_piano_sandbox_mode"]) ? "sandbox.tinypass.com" : "experience.tinypass.com";
         $piano_url = "https://" . $url . "/xbuilder/experience/executeAmp?protocol_version=1&aid=" . $options["revengine_piano_id"] ."&reader_id=READER_ID&url=SOURCE_URL&referer=DOCUMENT_REFERRER&_=RANDOM";
         require_once plugin_dir_path( dirname( __FILE__ ) ).'piano-composer/templates/frontend/amp.php';
+    }
+
+    protected function get_segments($user_id) {
+        try {
+            $url = get_option("revengine_segment_api_url");
+            $cache_duration = get_option("revengine_segment_api_cache_duration");
+            if (empty($cache_duration)) $cache_duration = 600; // Default 10 mins
+            if (!$url) {
+                return false;
+            }
+            $server_address = $url . "/reader/" . $user_id;
+            $cache_key = md5($server_address . 2);
+            $segments = get_transient($cache_key);
+            if ($segments === false) {
+                $ctx = stream_context_create(array('http'=>
+                    array(
+                        'timeout' => 1,
+                    )
+                ));
+                $result = file_get_contents($server_address, false, $ctx);
+                $data = json_decode($result);
+                if ($debug) {
+                    trigger_error($data, E_USER_NOTICE);
+                }
+                $segments = $data->data->segments;
+                print_r("<!-- revengine_segment_api_url cache miss -->");
+                set_transient($cache_key, $segments, $cache_duration);
+            }
+            return $segments;
+        } catch(Exception $e) {
+            trigger_error($e, E_USER_WARNING);
+            return false;
+        }
     }
 }
