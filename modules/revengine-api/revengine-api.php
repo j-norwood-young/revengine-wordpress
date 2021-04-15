@@ -120,6 +120,8 @@ class RevEngineAPI {
         "wp_user_level",
         "wsl_current_provider",
         "wsl_current_user_image",
+        "cc_expiry_date",
+        "cc_last4_digits"
     ];
 
     function __construct($revengine_globals) {
