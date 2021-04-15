@@ -227,7 +227,7 @@ class RevEngineAPI {
             } else {
                 $result[$lowercase_key] = $val;
             }
-            if (strpos($key, "date") !== false) {
+            if (strpos($key, "date") !== false) { // Watch out for credit card expiry dates
                 $result[$key] = $this->convert_to_date($val);
             }
         }
@@ -237,6 +237,9 @@ class RevEngineAPI {
     function convert_to_date($d) {
         if ($d == "0000-00-00 00:00:00") return "";
         if ($d == "") return "";
+        if (strlen($d) === 4) { // Probably cc
+            return date("Y-m-t", strtotime("20" . $d[2] . $d[3] . "-" . $d[0] . $d[1] . "-01 00:00:00"));
+        }
         if (is_numeric($d)) {
             return date("c", $d);
         }
