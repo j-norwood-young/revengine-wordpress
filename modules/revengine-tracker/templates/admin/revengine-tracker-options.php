@@ -23,7 +23,7 @@
                     <th scope="row">RevEngine Tracker Server Address</th>
                     <td>
                         <input style="width: 600px; height: 40px;" name="revengine_tracker_server_address" placeholder="revengine.dailymaverick.com" id="revengine_tracker_server_address" type="text" value="<?php echo esc_attr( get_option('revengine_tracker_server_address') ); ?>">
-                        <p>Ommit the "http(s)://".</p>
+                        <p>Omit the "http(s)://".</p>
                     </td>
                 </tr>
                 <tr>
