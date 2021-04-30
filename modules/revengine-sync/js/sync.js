@@ -3,7 +3,7 @@ const api_key = revengine_piano_sync_vars.api_key;
 const revengine_api_key = revengine_piano_sync_vars.revengine_api_key;
 const PER_PAGE = 100;
 const time_started = new Date();
-if (!$) $ = JQuery;
+if (!$) $ = jQuery;
 
 const formatNumber = (n) => {
     return new Intl.NumberFormat().format(n);
