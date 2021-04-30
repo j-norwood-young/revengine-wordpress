@@ -27,6 +27,8 @@ function revengine_init() {
     $revengine_tracker = new RevEngineTracker($revengine_globals);
     require_once(plugin_basename('modules/revengine-api/revengine-api.php' ) );
     $revengine_api = new RevEngineAPI($revengine_globals);
+    require_once(plugin_basename('modules/revengine-sync/revengine-sync.php' ) );
+    $revengine_sync = new RevEngineSync($revengine_globals);
 }
 add_action( 'init', 'revengine_init', 5 );
 
