@@ -36,7 +36,7 @@
                 <tr>
                     <th scope="row">RevEngine Sync API Key</th>
                     <td>
-                        <input style="width: 600px; height: 40px;" name="revengine_sync_api_key" placeholder="" id="revengine_sync_api_key" type="password" value="">
+                        <input style="width: 600px; height: 40px;" name="revengine_sync_api_key" placeholder="" id="revengine_sync_api_key" type="password">
                     </td>
                 </tr>
             </tbody>

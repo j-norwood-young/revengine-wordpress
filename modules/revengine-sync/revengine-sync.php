@@ -50,10 +50,16 @@ class RevEngineSync {
     }
 
     public function run_sync() {
+        $wordpress_id_field = "wordpress_id";
+        $test_mode = get_option("revengine_sync_test_mode");
+        if ($test_mode) {
+            $wordpress_id_field = "test_wordpress_id";
+        }
         $jsvars = [];
         $jsvars["api_url"] = get_option("revengine_sync_api_url");
         $jsvars["api_key"] = get_option("revengine_sync_api_key");
         $jsvars["revengine_api_key"] = get_option("revengine_api_key");
+        $jsvars["wordpress_id_field"] = $wordpress_id_field;
         $furl = plugin_dir_url( __FILE__ ) . 'js/sync.js';
         $fname = plugin_dir_path( __FILE__ ) . 'js/sync.js';
         $ver = date("ymd-Gis", filemtime($fname));
@@ -98,7 +104,7 @@ class RevEngineSync {
         if ($test_mode) {
             $wordpress_id_field = "test_wordpress_id";
         }
-        $readers =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader?page=$page&limit=$per_page&fields=email,first_name,last_name,display_name,wordpress_id&filter[wordpress_id]=\$exists:false&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body)->data;
+        $readers =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader?page=$page&limit=$per_page&fields=email,first_name,last_name,display_name,wordpress_id&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body)->data;
         // return $readers;
         foreach($readers as $reader) {
             try {

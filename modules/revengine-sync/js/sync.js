@@ -1,6 +1,7 @@
 const api_url = revengine_piano_sync_vars.api_url;
 const api_key = revengine_piano_sync_vars.api_key;
 const revengine_api_key = revengine_piano_sync_vars.revengine_api_key;
+const wordpress_id_field = revengine_piano_sync_vars.wordpress_id_field;
 const PER_PAGE = 100;
 const time_started = new Date();
 if (!$) $ = jQuery;
@@ -11,7 +12,7 @@ const formatNumber = (n) => {
 
 const readerCount = async () => {
     try {
-        return (await $.get(`${api_url}/count/reader?filter[wordpress_id]=$exists:false&filter[test_wordpress_id]=$exists:false&apikey=${api_key}`)).count;
+        return (await $.get(`${api_url}/count/reader?filter[${wordpress_id_field}]=$exists:false&apikey=${api_key}`)).count;
     } catch(err) {
         return Promise.reject(err);
     }
