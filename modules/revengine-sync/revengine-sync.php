@@ -112,9 +112,9 @@ class RevEngineSync {
                 $reader_id = $reader->_id;
                 $reader_email = $reader->email;
                 $reader_name = $reader->fist_name ?? $reader->display_name ?? explode("@", $reader->email)[0];
-                $user_id = username_exists( $reader_email );
+                $user_id = email_exists( $reader_email );
 
-                if ( ! $user_id && false == email_exists( $reader_email ) ) {
+                if (!$user_id) {
                     $random_password = wp_generate_password( $length = 12, $include_standard_special_chars = false );
                     $user_id = wp_create_user( $reader_name, $random_password, $reader_email );
                     $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
