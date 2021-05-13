@@ -117,9 +117,13 @@ class RevEngineSync {
                 if (!$user_id) {
                     $random_password = wp_generate_password( $length = 12, $include_standard_special_chars = false );
                     $user_id = wp_create_user( $reader_name, $random_password, $reader_email );
-                    $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
-                        $wordpress_id_field => $user_id
-                    ]);
+                    if (!is_wp_error($user_id)) {
+                        $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
+                            $wordpress_id_field => $user_id
+                        ]);
+                    } else {
+                        trigger_error($user_id, E_USER_WARNING);
+                    }
                 } else {
                     $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
                         $wordpress_id_field => $user_id
