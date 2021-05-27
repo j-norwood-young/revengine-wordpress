@@ -294,6 +294,8 @@ class RevEngineAPI {
         }
         $result = [];
         foreach ($posts as $key => $post) {
+            $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
+            $post->img_full = get_the_post_thumbnail_url($post->ID, "full");
             $post->author = get_author_name($post->post_author);
             $tags = get_the_terms($post->ID, $post_type . "_tag");
             if (is_array($tags)) {
@@ -331,7 +333,9 @@ class RevEngineAPI {
                 "tags" => $post->tags,
                 "sections" => $post->sections,
                 "featured" => $featured,
-                "position" => $position
+                "position" => $position,
+                "img_thumbnail" => $post->img_thumbnail,
+                "img_full" => $post->img_full,
             ];
         }
         $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
