@@ -295,6 +295,7 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $key => $post) {
             $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
+            $post->img_medium = get_the_post_thumbnail_url($post->ID, "medium");
             $post->img_full = get_the_post_thumbnail_url($post->ID, "full");
             $post->author = get_author_name($post->post_author);
             $tags = get_the_terms($post->ID, $post_type . "_tag");
@@ -335,6 +336,7 @@ class RevEngineAPI {
                 "featured" => $featured,
                 "position" => $position,
                 "img_thumbnail" => $post->img_thumbnail,
+                "img_medium" => $post->img_medium,
                 "img_full" => $post->img_full,
             ];
         }
