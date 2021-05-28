@@ -623,21 +623,13 @@ class RevEngineAPI {
         foreach ($posts as $post) {
             $subscription = wcs_get_subscription( $post );
             $subscription_data = $subscription->get_data();
-            if ($subscription_data["parent_id"]) {
-                $order = wc_get_order($subscription_data["parent_id"]);
-                if ($order) {
-                    $items = $order->get_items();
-                    foreach ($items  as $item ) {
-                        $product = $item->get_product();
-                        if ($product) {
-                            $subscription_data["products"][] = array(
-                                "name" => $product->get_name(),
-                                "quantity" => $item->get_quantity(),
-                                "total" => $item->get_total(),
-                            );
-                        }
-                    }
-                }
+            foreach($subscription_data["line_items"] as $line_item) {
+                $line_item_data = $line_item->get_data();
+                $subscription_data["products"][] = array(
+                    "name" => $line_item_data["name"],
+                    "quantity" => $line_item_data["quantity"],
+                    "total" => $line_item_data["total"],
+                );
             }
             $filtered_subscription_data = [];
             foreach($subscription_data as $key => $val) {
