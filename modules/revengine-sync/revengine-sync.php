@@ -37,6 +37,15 @@ class RevEngineSync {
             'revengine-sync-run',
             [ $this, 'run_sync' ]
         );
+        add_submenu_page(
+            null,
+            __('Run RevEngine Sync', 'revengine-sync'),
+            __('Run RevEngine Sync', 'revengine-sync'),
+            // an admin-level user.
+            'manage_options',
+            'revengine-sync-run-all',
+            [ $this, 'sync_all_users' ]
+        );
     }
 
     public function register_settings() {
@@ -106,7 +115,8 @@ class RevEngineSync {
         }
         $readers =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader?page=$page&limit=$per_page&fields=email,first_name,last_name,display_name,wordpress_id&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body)->data;
         // return $readers;
-        foreach($readers as $reader) {
+        for($x = 0; $x < sizeof($readers); $x++) {
+            $reader = $readers[$x];
             try {
                 trigger_error($reader->_id, E_USER_NOTICE);
                 $reader_id = $reader->_id;
@@ -121,15 +131,22 @@ class RevEngineSync {
                         $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
                             $wordpress_id_field => $user_id
                         ]);
+                        $readers[$x]->wordpress_user_id = $user_id;
+                        $readers[$x]->op = "create";
                     } else {
+                        $readers[$x]->error = $user_id;
                         trigger_error($user_id, E_USER_WARNING);
                     }
                 } else {
                     $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
                         $wordpress_id_field => $user_id
                     ]);
+                    $readers[$x]->wordpress_user_id = $user_id;
+                    $readers[$x]->op = "update";
                 }
+                trigger_error(json_encode($readers[$x]), E_USER_NOTICE);
             } catch(Exception $err) {
+                $readers[$x]->error = $err;
                 trigger_error($err, E_USER_ERROR);
             }
         }
@@ -140,8 +157,8 @@ class RevEngineSync {
         global $wp;
         $per_page = intval($request->get_param( "per_page") ?? self::PER_PAGE);
         $page = intval($request->get_param( "page") ?? 1);
-        $readers = $this->_sync_user_page($page, $per_page);
-        return $readers;
+        $result = $this->_sync_user_page($page, $per_page);
+        return $result;
     }
 
     public function sync_all_users() {
