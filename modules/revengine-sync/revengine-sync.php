@@ -123,8 +123,12 @@ class RevEngineSync {
                 $reader_email = $reader->email;
                 $reader_name = $reader->fist_name ?? $reader->display_name ?? explode("@", $reader->email)[0];
                 $user_id = email_exists( $reader_email );
-
+                $readers[$x]->reader_name = $reader_name;
                 if (!$user_id) {
+                    if (username_exists($reader_name)) {
+                        $reader_name = $reader_email;
+                        $readers[$x]->reader_name = $reader_name;
+                    }
                     $random_password = wp_generate_password( $length = 12, $include_standard_special_chars = false );
                     $user_id = wp_create_user( $reader_name, $random_password, $reader_email );
                     if (!is_wp_error($user_id)) {
