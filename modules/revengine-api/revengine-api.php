@@ -296,8 +296,8 @@ class RevEngineAPI {
         foreach ($posts as $key => $post) {
             if ($post_type === "opinion-piece") {
                 $post->img_thumbnail = getAuthorImageUrl($post->post_author, "thumbnail");
-                $post->img_medium = get_cupp_meta($post->post_author, "medium");
-                $post->img_full = get_the_author_meta( 'cupp_upload_meta', $post->post_author);
+                $post->img_medium = getAuthorImageUrl($post->post_author, "medium");
+                $post->img_full = getAuthorImageUrl($post->post_author, "full");
             } else {
                 $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
                 $post->img_medium = get_the_post_thumbnail_url($post->ID, "medium");
