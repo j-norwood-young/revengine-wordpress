@@ -106,6 +106,10 @@ class RevEngineTracker {
             if (is_array($tags)) {
                 $data->post_tags = array_merge($data->post_tags, array_map(function($i) { return $i->name; }, $tags));
             }
+            $tags = get_the_terms($post_id, "dm_article_theme");
+            if (is_array($tags)) {
+                $data->post_tags = array_merge($data->post_tags, array_map(function($i) { return $i->name; }, $tags));
+            }
         }
         return $data;
     }
