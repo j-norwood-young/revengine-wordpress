@@ -89,6 +89,10 @@ class PianoComposer {
             if ($tags) {
                 $result["tags"] = array_map(function($i) { return $i->name; }, $tags);
             }
+            $dmtags = get_the_terms($post_id, "dm_article_theme");
+            if (is_array($dmtags)) {
+                $result["tags"] = array_merge($result["tags"], array_map(function($i) { return $i->name; }, $dmtags));
+            }
             $sections = get_the_terms($post_id, "section");
             if ($sections) {
                 $result["sections"] = array_map(function($i) { return $i->name; }, $sections);
@@ -104,6 +108,10 @@ class PianoComposer {
             $tags = get_the_terms($post_id, "opinion-piece-tag");
             if ($tags) {
                 $result["tags"] = array_map(function($i) { return $i->name; }, $tags);
+            }
+            $dmtags = get_the_terms($post_id, "dm_article_theme");
+            if (is_array($dmtags)) {
+                $result["tags"] = array_merge($result["tags"], array_map(function($i) { return $i->name; }, $dmtags));
             }
             $result["sections"] = ["opinionista"];
         }
@@ -137,6 +145,10 @@ class PianoComposer {
             if ($tags) {
                 $options["tags"] = array_map(function($i) { return $i->name; }, $tags);
             }
+            $dmtags = get_the_terms($post_id, "dm_article_theme");
+            if (is_array($dmtags)) {
+                $options["tags"] = array_merge($options["tags"], array_map(function($i) { return $i->name; }, $dmtags));
+            }
             $sections = get_the_terms($post_id, "section");
             if ($sections) {
                 $options["sections"] = array_map(function($i) { return $i->name; }, $sections);
@@ -152,6 +164,10 @@ class PianoComposer {
             $tags = get_the_terms($post_id, "opinion-piece-tag");
             if ($tags) {
                 $options["tags"] = array_map(function($i) { return $i->name; }, $tags);
+            }
+            $dmtags = get_the_terms($post_id, "dm_article_theme");
+            if (is_array($dmtags)) {
+                $options["tags"] = array_merge($options["tags"], array_map(function($i) { return $i->name; }, $dmtags));
             }
             $options["sections"] = ["opinionista"];
         }
