@@ -246,6 +246,18 @@ class RevEngineAPI {
         return date("c", strtotime($d));
     }
 
+    private function modified_after($modified_after) {
+        $d = strtotime($modified_after);
+        return [
+            'column'     => 'post_modified_gmt',
+            "after" => [
+                "year" => date("Y", $d),
+                "month" => date("n", $d),
+                "day" => date("j", $d)
+            ]
+        ];
+    }
+
     function check_access(WP_REST_Request $request) {
         $headers = getallheaders();
         $authorization = "";
@@ -265,7 +277,11 @@ class RevEngineAPI {
     }
 
     private function get_content($post_type, $per_page, $page, $modified_after) {
+        function map_name($term) { return $term->name; }
         global $wp;
+        // $taxonomies = get_taxonomies();
+        // print_r($taxonomies);
+        // die();
         $args = ([
             'post_type'   => $post_type,
             'post_status' => 'publish',
@@ -278,13 +294,10 @@ class RevEngineAPI {
             'no_found_rows' => false
         ]);
         if (!empty($modified_after)) {
-            $args["date_query"] = array(
-                array(
-                    'column'     => 'post_modified_gmt',
-                    'after'      => $modified_after,
-                ),
-            );
+            $args["date_query"] = $this->modified_after($modified_after);
         }
+        // print_r($args);
+        // die();
         $wp_query = new WP_Query($args);
         $posts = $wp_query->posts;
         $count = intval($wp_query->found_posts);
@@ -306,16 +319,29 @@ class RevEngineAPI {
             $post->author = get_author_name($post->post_author);
             $tags = get_the_terms($post->ID, $post_type . "_tag");
             if (is_array($tags)) {
-                $post->tags = array_map(function($i) { return $i->name; }, $tags);
+                $post->tags = array_map("map_name", $tags);
             } else {
                 $post->tags = [];
             }
+            $dm_tags = get_the_terms($post->ID, "dm_article_theme");
+            if (is_array($dm_tags)) {
+                $post->tags = array_merge($post->tags, array_map("map_name", $dm_tags));
+            }
             $terms = get_the_terms($post->ID, "section");
             if (is_array($terms)) {
-                $post->sections = array_map(function($i) { return $i->name; }, $terms);
+                $post->sections = array_map("map_name", $terms);
             } else {
                 $post->sections = [];
             }
+            $taxonomies = get_post_taxonomies( $post->ID );
+            $terms = [];
+            foreach($taxonomies as $taxonomy) {
+                $new_terms = get_the_terms( $post->ID, $taxonomy );
+                if (!empty($new_terms)) {
+                    $terms = array_merge($terms, $new_terms);
+                }
+            }
+            $post->terms = array_map("map_name", $terms);
             $featured = false;
             $flags = get_the_terms($post->ID, "flag");
             $position = null;
@@ -338,6 +364,7 @@ class RevEngineAPI {
                 "urlid" => $post->post_name,
                 "type" => $post->post_type,
                 "tags" => $post->tags,
+                "terms" => $post->terms,
                 "sections" => $post->sections,
                 "featured" => $featured,
                 "position" => $position,
@@ -530,12 +557,7 @@ class RevEngineAPI {
             'fields'         => 'ids',
         ]);
         if (!empty($request->get_param( "modified_after"))) {
-            $args["date_query"] = array(
-                array(
-                    'column'     => 'post_modified_gmt',
-                    'after'      => $request->get_param( "modified_after"),
-                ),
-            );
+            $args["date_query"] = $this->modified_after($request->get_param( "modified_after"));
         }
         $wp_query = new WP_Query($args);
         $posts = $wp_query->posts;
@@ -602,12 +624,7 @@ class RevEngineAPI {
             'fields'            => 'ids',
         ]);
         if (!empty($request->get_param("modified_after"))) {
-            $args["date_query"] = array(
-                array(
-                    'column'     => 'post_modified_gmt',
-                    'after'      => $request->get_param( "modified_after"),
-                ),
-            );
+            $args["date_query"] = $this->modified_after($request->get_param( "modified_after"));
         }
         if (!empty($request->get_param("customer_id"))) {
             $args["meta_query"] = array(
@@ -683,12 +700,7 @@ class RevEngineAPI {
             'post_status' => array("any"),
         ]);
         if (!empty($request->get_param( "modified_after"))) {
-            $args["date_query"] = array(
-                array(
-                    'column'     => 'post_modified_gmt',
-                    'after'      => $request->get_param( "modified_after"),
-                ),
-            );
+            $args["date_query"] = $this->modified_after($request->get_param( "modified_after"));
         }
         if (!empty($request->get_param("status"))) {
             $args["post_status"] = 'wcm-' . $request->get_param("status");
