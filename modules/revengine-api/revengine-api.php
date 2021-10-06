@@ -166,6 +166,11 @@ class RevEngineAPI {
             'callback' => [$this, 'get_opinions'],
             'permission_callback' => [$this, 'check_access']
         ));
+        register_rest_route( 'revengine/v1', '/cartoons', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_cartoons'],
+            'permission_callback' => [$this, 'check_access']
+        ));
         register_rest_route( 'revengine/v1', '/featured', array(
             'methods' => 'GET',
             'callback' => [$this, 'get_featured'],
@@ -405,6 +410,14 @@ class RevEngineAPI {
         $page = intval($request->get_param( "page") ?? 1);
         $modified_after = $request->get_param( "modified_after");
         return $this->get_content("opinion-piece", $per_page, $page, $modified_after);
+    }
+
+    function get_cartoons(WP_REST_Request $request) {
+        global $wp;
+        $per_page = intval($request->get_param( "per_page") ?? 10);
+        $page = intval($request->get_param( "page") ?? 1);
+        $modified_after = $request->get_param( "modified_after");
+        return $this->get_content("cartoon", $per_page, $page, $modified_after);
     }
 
     public function getFeaturedPostsArgs($frontPage = 'main') : array
