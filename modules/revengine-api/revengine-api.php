@@ -338,6 +338,7 @@ class RevEngineAPI {
             } else {
                 $post->sections = [];
             }
+            $post->custom_section_label = get_post_meta($post->ID, "dm_custom_section_label", true);
             $taxonomies = get_post_taxonomies( $post->ID );
             $terms = [];
             foreach($taxonomies as $taxonomy) {
@@ -371,6 +372,7 @@ class RevEngineAPI {
                 "tags" => $post->tags,
                 "terms" => $post->terms,
                 "sections" => $post->sections,
+                "custom_section_label" => $post->custom_section_label,
                 "featured" => $featured,
                 "position" => $position,
                 "img_thumbnail" => $post->img_thumbnail,
