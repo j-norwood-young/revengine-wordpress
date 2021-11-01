@@ -60,12 +60,12 @@ class RevEngineTracker {
             $post_title = "";
         }
         // trigger_error(json_encode($post), E_USER_NOTICE);
-        if (isset($_COOKIE["revengine-browser-token"])) {
-            $browser_token = $_COOKIE["revengine-browser-token"];
-        } else {
-            $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
-            setcookie("revengine-browser-token", $browser_token);
-        }
+        // if (isset($_COOKIE["revengine-browser-token"])) {
+        //     $browser_token = $_COOKIE["revengine-browser-token"];
+        // } else {
+        //     $browser_token = bin2hex(openssl_random_pseudo_bytes(16));
+        //     setcookie("revengine-browser-token", $browser_token);
+        // }
         $data = (object) [
             "action" => "pageview",
             "ip" => $_SERVER["REMOTE_ADDR"],
