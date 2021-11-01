@@ -175,9 +175,11 @@ class PianoComposer {
         $options["segments"] = [];
         if (!empty(get_current_user_id())) {
             $segments = $this->get_segments(get_current_user_id());
-            foreach($segments as $segment) {
-                $segment_name = "segment-" . str_replace(" ", "_", strtolower($segment));
-                $options["segments"][$segment_name] = 1;
+            if (!empty($segments)) {
+                foreach($segments as $segment) {
+                    $segment_name = "segment-" . str_replace(" ", "_", strtolower($segment));
+                    $options["segments"][$segment_name] = 1;
+                }
             }
         }
         foreach($this->options as $option) {
