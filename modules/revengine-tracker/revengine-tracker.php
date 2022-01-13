@@ -72,7 +72,7 @@ class RevEngineTracker {
             "request_time" => $_SERVER["REQUEST_TIME"],
             "post_id" => $post_id,
             "user_id" => get_current_user_id(),
-            "browser_id" => $browser_token,
+            // "browser_id" => $browser_token,
             "post_title" => esc_html($post_title),
             "post_type" => $post_type,
             "home_page" => is_front_page(),
