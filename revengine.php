@@ -33,10 +33,10 @@ function revengine_init() {
 add_action( 'init', 'revengine_init', 5 );
 
 // Shortcodes
-function shortcodes($atts) {
+// function shortcodes($atts) {
 	// require(plugin_basename("templates/debicheck-form-shortcode.php"));
-}
+// }
 
-add_shortcode( 'debicheck-form', 'shortcodes' );
+// add_shortcode( 'debicheck-form', 'shortcodes' );
 
 // revengine_init();
