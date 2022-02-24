@@ -451,12 +451,12 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $post) {
             $post->author = get_author_name($post->post_author);
-            $tags = get_the_terms($post->ID, $post_type . "_tag");
-            if (is_array($tags)) {
-                $post->tags = array_map(function($i) { return $i->name; }, $tags);
-            } else {
-                $post->tags = [];
-            }
+            // $tags = get_the_terms($post->ID, $post_type . "_tag");
+            // if (is_array($tags)) {
+            //     $post->tags = array_map(function($i) { return $i->name; }, $tags);
+            // } else {
+            //     $post->tags = [];
+            // }
             $terms = get_the_terms($post->ID, "section");
             if (is_array($terms)) {
                 $post->sections = array_map(function($i) { return $i->name; }, $terms);
@@ -514,7 +514,7 @@ class RevEngineAPI {
         $page_count = ceil(intval($count) / $per_page);
         $offset = ($page - 1) * $per_page;
         if (empty($request->get_param("id"))) {
-            $sql = "SELECT * FROM wp_users LIMIT $per_page OFFSET $offset";
+            $sql = "SELECT * FROM wp_users ORDER BY ID LIMIT $per_page OFFSET $offset";
         } else {
             $page_count = $count = $offset = 1;
             $sql = "SELECT * FROM wp_users WHERE ID={$request->get_param('id')}";
