@@ -12,8 +12,12 @@ class PianoComposer {
     function __construct($revengine_globals) {
         $this->revengine_globals = &$revengine_globals;
         $sections = get_terms("section");
-        foreach($sections as $section) {
-            $this->options[] = "revengine_exclude_section_{$section->slug}";
+        if (!empty($sections)) {
+            foreach($sections as $section) {
+                if (is_object($section)) {
+                    $this->options[] = "revengine_exclude_section_{$section->slug}";
+                }
+            }
         }
         add_action('admin_init', [ $this, 'register_settings' ]);
         add_action('admin_menu', [ $this, 'options_page' ]);
@@ -227,9 +231,6 @@ class PianoComposer {
                 ));
                 $result = file_get_contents($server_address, false, $ctx);
                 $data = json_decode($result);
-                if ($debug) {
-                    trigger_error($data, E_USER_NOTICE);
-                }
                 $segments = $data->data->segments;
                 print_r("<!-- revengine_segment_api_url cache miss -->");
                 set_transient($cache_key, $segments, $cache_duration);
