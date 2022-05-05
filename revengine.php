@@ -19,6 +19,8 @@ function revengine_init() {
     require_once(plugin_basename('includes/revengine-admin.php' ) );
     $revengine_admin = new RevEngineAdmin($revengine_globals);
     // Modules - these should eventually autoload
+    require_once(plugin_basename('modules/revengine-callback/revengine-callback.php' ) );
+    $revengine_callback = new RevEngineCallback($revengine_globals);
     require_once(plugin_basename('modules/content-promoter/content-promoter.php' ) );
     $revengine_content_promoter = new ContentPromoter($revengine_globals);
     require_once(plugin_basename('modules/piano-composer/piano-composer.php' ) );
@@ -29,6 +31,7 @@ function revengine_init() {
     $revengine_api = new RevEngineAPI($revengine_globals);
     require_once(plugin_basename('modules/revengine-sync/revengine-sync.php' ) );
     $revengine_sync = new RevEngineSync($revengine_globals);
+    
 }
 add_action( 'init', 'revengine_init', 5 );
 
