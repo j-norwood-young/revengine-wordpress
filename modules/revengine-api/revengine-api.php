@@ -121,7 +121,12 @@ class RevEngineAPI {
         "wsl_current_provider",
         "wsl_current_user_image",
         "cc_expiry_date",
-        "cc_last4_digits"
+        "cc_last4_digits",
+        "_dm_campaign_created_by_utm_source",
+        "_dm_campaign_created_by_utm_medium",
+        "_dm_campaign_created_by_utm_campaign",
+        "_dm_campaign_created_by_utm_term",
+        "_dm_campaign_created_by_utm_content",
     ];
 
     function __construct($revengine_globals) {
