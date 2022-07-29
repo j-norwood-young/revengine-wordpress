@@ -237,7 +237,7 @@ class PianoComposer {
             }
             return $segments;
         } catch(Exception $e) {
-            trigger_error($e, E_USER_WARNING);
+            // trigger_error($e, E_USER_WARNING);
             return false;
         }
     }
