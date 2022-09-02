@@ -45,7 +45,7 @@ class RevEngineCallback {
             wp_die(__('You do not have sufficient permissions to access this page.'));
         }
         if (!empty(get_option("revengine_callback_url"))) {
-            $callback_result = $this->_test_callback();
+            $callback_result = revengine_test_callback();
         }
         require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-callback/templates/admin/revengine-callback-settings.php';
     }
@@ -66,7 +66,7 @@ class RevEngineCallback {
                 "old" => $old,
                 "new" => $new,
             ];
-            $this->_fire_callback("/woocommerce/subscription/update", $result);
+            revengine_fire_callback("/woocommerce/subscription/update", $result);
         } catch (Exception $e) {
             error_log($e->getMessage());
         }
@@ -80,7 +80,7 @@ class RevEngineCallback {
                 "old" => $old,
                 "new" => $new,
             ];
-            $this->_fire_callback("/wordpress/user/update", $result);
+            revengine_fire_callback("/wordpress/user/update", $result);
         } catch (Exception $e) {
             error_log($e->getMessage());
         }
@@ -92,7 +92,7 @@ class RevEngineCallback {
             $result = [
                 "user" => $user,
             ];
-            $this->_fire_callback("/wordpress/user/create", $result);
+            revengine_fire_callback("/wordpress/user/create", $result);
         } catch (Exception $e) {
             error_log($e->getMessage());
         }
@@ -104,40 +104,7 @@ class RevEngineCallback {
             $result = [
                 "user" => $user,
             ];
-            $this->_fire_callback("/wordpress/user/delete", $result);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-    }
-
-    private function _fire_callback($endpoint, $data) {
-        try {
-            $url = rtrim(get_option("revengine_callback_url"), "/") . "/" . ltrim($endpoint, "/");
-            $ch = curl_init();
-            $payload = json_encode( $data );
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization: Bearer ' . get_option("revengine_callback_token")));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($ch);
-            if (curl_errno($ch)) {
-                error_log("RevEngine Callback error: " . curl_error($ch));
-                $response = curl_error($ch);
-            }
-            curl_close($ch);
-            if (get_option("revengine_callback_debug")) {
-                error_log("RevEngine Callback URL: " . $url);
-                error_log("RevEngine Callback Response: " . print_r($response, true));
-            }
-            return $response;
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-    }
-
-    private function _test_callback() {
-        try {
-            return $this->_fire_callback("/test", array("test" => "test"));
+            revengine_fire_callback("/wordpress/user/delete", $result);
         } catch (Exception $e) {
             error_log($e->getMessage());
         }
