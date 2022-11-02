@@ -191,7 +191,7 @@ class RevEngineAPI {
             'callback' => [$this, 'get_users'],
             'permission_callback' => [$this, 'check_access'],
             'args' => [
-                'id'
+                'id' => []
             ]
         ));
         register_rest_route( 'revengine/v1', '/woocommerce_orders', array(
