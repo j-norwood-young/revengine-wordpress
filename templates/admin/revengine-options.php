@@ -14,11 +14,11 @@
                 <tr>
                     <th scope="row">RevEngine API Key</th>
                     <td>
-                        <input style="width: 600px; height: 40px;" name="revengine_api_key" id="revengine_api_key" type="text" value="<?php echo esc_attr( get_option('revengine_api_key') ); ?>" readonly="readonly">
+                        <input style="width: 600px; height: 40px;" name="revengine_api_key" id="revengine_api_key" type="text" value="<?php esc_attr_e( get_option('revengine_api_key') ); ?>" readonly="readonly">
                     </td>
                 </tr>
             </tbody>
         </table>
-        <?=	submit_button(); ?>
+        <?php submit_button(); ?>
     </form>
 </div><!-- /.wrap -->

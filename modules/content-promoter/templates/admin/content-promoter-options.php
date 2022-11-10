@@ -13,7 +13,7 @@
                     <th scope="row">Enable Content Promoter</th>
                     <td>
                         <label for="revengine_content_promoter_active">
-                            <input name="revengine_content_promoter_active" type="checkbox" id="revengine_content_promoter_active" value="1" <?= (get_option("revengine_content_promoter_active")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_content_promoter_active" type="checkbox" id="revengine_content_promoter_active" value="1" <?php esc_attr_e(get_option("revengine_content_promoter_active")) ? 'checked="checked"' : "" ?>>
                         </label>
                     </td>
                 </tr>
@@ -25,6 +25,6 @@
                 </tr>
             </tbody>
         </table>
-        <?=	submit_button(); ?>
+        <?php submit_button(); ?>
     </form>
 </div><!-- /.wrap -->

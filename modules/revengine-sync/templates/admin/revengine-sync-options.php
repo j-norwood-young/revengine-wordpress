@@ -10,19 +10,19 @@
         <table class="form-table">
             <tbody>
                 <tr>
-                    <th scope="row">Enable RevEngine Sync</th>
+                    <th scope="row"><?php _e("Enable RevEngine Sync", "revengine") ?></th>
                     <td>
                         <label for="revengine_sync_active">
-                            <input name="revengine_sync_active" type="checkbox" id="revengine_sync_active" value="1" <?= (get_option("revengine_sync_active")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_sync_active" type="checkbox" id="revengine_sync_active" value="1" <?php esc_attr_e(get_option("revengine_sync_active")) ? 'checked="checked"' : "" ?>>
                         </label>
-                        <p>Next run: <?= (wp_next_scheduled( 'revengine_sync_all_users' )) ? date("Y-m-d H:i:s +Z", wp_next_scheduled( 'revengine_sync_all_users' )) : "" ?></p>
+                        <p>Next run: <?php esc_html_e((wp_next_scheduled( 'revengine_sync_all_users' )) ? gmdate("Y-m-d H:i:s +Z", wp_next_scheduled( 'revengine_sync_all_users' )) : "") ?></p>
                     </td>
                 </tr>
                 <tr>
                     <th scope="row">Test Mode</th>
                     <td>
                         <label for="revengine_sync_test_mode">
-                            <input name="revengine_sync_test_mode" type="checkbox" id="revengine_sync_test_mode" value="1" <?= (get_option("revengine_sync_test_mode")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_sync_test_mode" type="checkbox" id="revengine_sync_test_mode" value="1" <?php esc_attr_e(get_option("revengine_sync_test_mode")) ? 'checked="checked"' : "" ?>>
                         </label>
                         <p><strong>Note:</strong> In Test Mode, we will still add RevEngine users to Wordpress, but will assign wordpress IDs to "test_wordpress_id" on RevEngine.</p>
                     </td>
@@ -41,7 +41,7 @@
                 </tr>
             </tbody>
         </table>
-        <?=	submit_button(); ?>
+        <?php submit_button(); ?>
         <a href="admin.php?page=revengine-sync-run" class="button button-primary">Run</a>
     </form>
 </div><!-- /.wrap -->

@@ -1,1 +1,1 @@
-<amp-pixel src="<?= $revengine_server ?>" layout="nodisplay"></amp-pixel>
+<amp-pixel src="<?php echo esc_url($revengine_server) ?>" layout="nodisplay"></amp-pixel>

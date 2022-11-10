@@ -1,6 +1,6 @@
 <script id="amp-access" type="application/json">
     {
-        "authorization": "<?= $piano_url ?>",
+        "authorization": "<?php echo esc_url($piano_url) ?>",
         "noPingback": "true"
     }
 </script>
