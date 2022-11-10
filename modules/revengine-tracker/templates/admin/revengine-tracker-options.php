@@ -15,7 +15,7 @@
                     <th scope="row">Enable RevEngine Tracking</th>
                     <td>
                         <label for="revengine_enable_tracking">
-                            <input name="revengine_enable_tracking" type="checkbox" id="revengine_enable_tracking" value="1" <?php esc_attr_e(get_option("revengine_enable_tracking")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_enable_tracking" type="checkbox" id="revengine_enable_tracking" value="1" <?php esc_attr_e(get_option("revengine_enable_tracking") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -37,7 +37,7 @@
                     <th scope="row">Use SSL</th>
                     <td>
                         <label for="revengine_tracker_ssl">
-                            <input name="revengine_tracker_ssl" type="checkbox" id="revengine_tracker_ssl" value="1" <?php esc_attr_e(get_option("revengine_tracker_ssl")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_tracker_ssl" type="checkbox" id="revengine_tracker_ssl" value="1" <?php esc_attr_e(get_option("revengine_tracker_ssl") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -52,7 +52,7 @@
                     <th scope="row">Enable RevEngine Tracking on AMP pages</th>
                     <td>
                         <label for="revengine_tracker_amp">
-                            <input name="revengine_tracker_amp" type="checkbox" id="revengine_tracker_amp" value="1" <?php esc_attr_e(get_option("revengine_tracker_amp")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_tracker_amp" type="checkbox" id="revengine_tracker_amp" value="1" <?php esc_attr_e(get_option("revengine_tracker_amp") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -60,7 +60,7 @@
                     <th scope="row">Use IFrame Method</th>
                     <td>
                         <label for="revengine_tracker_iframe">
-                            <input name="revengine_tracker_iframe" type="checkbox" id="revengine_tracker_iframe" value="1" <?php esc_attr_e(get_option("revengine_tracker_iframe")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_tracker_iframe" type="checkbox" id="revengine_tracker_iframe" value="1" <?php esc_attr_e(get_option("revengine_tracker_iframe") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -68,7 +68,7 @@
                     <th scope="row">Enable Debug</th>
                     <td>
                         <label for="revengine_tracker_debug">
-                            <input name="revengine_tracker_debug" type="checkbox" id="revengine_tracker_debug" value="1" <?php esc_attr_e(get_option("revengine_tracker_debug")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_tracker_debug" type="checkbox" id="revengine_tracker_debug" value="1" <?php esc_attr_e(get_option("revengine_tracker_debug") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>

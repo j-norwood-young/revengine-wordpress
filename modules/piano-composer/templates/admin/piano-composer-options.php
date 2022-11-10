@@ -13,7 +13,7 @@
                     <th scope="row">Enable Piano Compose Integration</th>
                     <td>
                         <label for="revengine_piano_active">
-                            <input name="revengine_piano_active" type="checkbox" id="revengine_piano_active" value="1" <?php esc_attr_e(get_option("revengine_piano_active")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_piano_active" type="checkbox" id="revengine_piano_active" value="1" <?php esc_attr_e(get_option("revengine_piano_active") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -21,7 +21,7 @@
                     <th scope="row">Sandbox Mode</th>
                     <td>
                         <label for="revengine_piano_sandbox_mode">
-                            <input name="revengine_piano_sandbox_mode" type="checkbox" id="revengine_piano_sandbox_mode" value="1" <?php esc_attr_e(get_option("revengine_piano_sandbox_mode")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_piano_sandbox_mode" type="checkbox" id="revengine_piano_sandbox_mode" value="1" <?php esc_attr_e(get_option("revengine_piano_sandbox_mode") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>

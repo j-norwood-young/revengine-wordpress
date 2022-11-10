@@ -15,7 +15,7 @@
                     <th scope="row">Enable RevEngine API</th>
                     <td>
                         <label for="revengine_enable_api">
-                            <input name="revengine_enable_api" type="checkbox" id="revengine_enable_api" value="1" <?php esc_attr_e(get_option("revengine_enable_api")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_enable_api" type="checkbox" id="revengine_enable_api" value="1" <?php esc_attr_e(get_option("revengine_enable_api") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
@@ -32,7 +32,7 @@
                     <th scope="row">Enable Debug</th>
                     <td>
                         <label for="revengine_api_debug">
-                            <input name="revengine_api_debug" type="checkbox" id="revengine_api_debug" value="1" <?php esc_attr_e(get_option("revengine_api_debug")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_api_debug" type="checkbox" id="revengine_api_debug" value="1" <?php esc_attr_e(get_option("revengine_api_debug") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>

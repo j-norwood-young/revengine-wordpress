@@ -39,7 +39,7 @@
                     <th scope="row">Enable Debug</th>
                     <td>
                         <label for="revengine_callback_debug">
-                            <input name="revengine_callback_debug" type="checkbox" id="revengine_callback_debug" value="1" <?php esc_attr_e(get_option("revengine_callback_debug")) ? 'checked="checked"' : "" ?>>
+                            <input name="revengine_callback_debug" type="checkbox" id="revengine_callback_debug" value="1" <?php esc_attr_e(get_option("revengine_callback_debug") ? 'checked="checked"' : "") ?>>
                         </label>
                     </td>
                 </tr>
