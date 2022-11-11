@@ -55,7 +55,6 @@ class PianoComposer {
         $ignore_array = array_map("trim", explode(",", $ignore_urls));
         foreach ($ignore_array as $ignore_url) {
             if (stripos($url, $ignore_url)) {
-                //print_r("<!-- revengine-ignore $url = $ignore_url -->");
                 return true;
             }
         }
@@ -68,7 +67,6 @@ class PianoComposer {
         $ignore = false;
         foreach($sections as $section) {
             if (get_option("revengine_exclude_section_{$section->slug}", false)) {
-                //print_r("<!-- revengine_exclude_section_{$section->slug} -->");
                 $ignore = true;
             }
         }
@@ -192,7 +190,7 @@ class PianoComposer {
         if (!$options["revengine_piano_active"]) return;
         $furl = plugin_dir_url( __FILE__ ) . 'js/piano.js';
         $fname = plugin_dir_path( __FILE__ ) . 'js/piano.js';
-        $ver = date("ymd-Gis", filemtime($fname));
+        $ver = gmdate("ymd-Gis", filemtime($fname));
         wp_enqueue_script( "revengine-piano-composer", $furl, null, $ver, true );
         wp_localize_script( "revengine-piano-composer", "revengine_piano_composer_vars", $options);
     }
@@ -232,12 +230,11 @@ class PianoComposer {
                 $result = file_get_contents($server_address, false, $ctx);
                 $data = json_decode($result);
                 $segments = $data->data->segments;
-                print_r("<!-- revengine_segment_api_url cache miss -->");
+                echo "<!-- revengine_segment_api_url cache miss -->";
                 set_transient($cache_key, $segments, $cache_duration);
             }
             return $segments;
         } catch(Exception $e) {
-            // trigger_error($e, E_USER_WARNING);
             return false;
         }
     }
