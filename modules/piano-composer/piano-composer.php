@@ -227,8 +227,12 @@ class PianoComposer {
                         'timeout' => 1,
                     )
                 ));
-                $result = file_get_contents($server_address, false, $ctx);
+                $result = @file_get_contents($server_address, false, $ctx);
+                if( $result === FALSE )
+                    return false;
                 $data = json_decode($result);
+                if ( !isset($data->data) || !isset($data->data->segments) )
+                    return false;
                 $segments = $data->data->segments;
                 echo "<!-- revengine_segment_api_url cache miss -->";
                 set_transient($cache_key, $segments, $cache_duration);
