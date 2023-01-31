@@ -248,12 +248,12 @@ class RevEngineAPI {
         if ($d == "0000-00-00 00:00:00") return "";
         if ($d == "") return "";
         if (strlen($d) === 4) { // Probably cc
-            return date("Y-m-t", strtotime("20" . $d[2] . $d[3] . "-" . $d[0] . $d[1] . "-01 00:00:00"));
+            return gmdate("Y-m-t", strtotime("20" . $d[2] . $d[3] . "-" . $d[0] . $d[1] . "-01 00:00:00"));
         }
         if (is_numeric($d)) {
-            return date("c", $d);
+            return gmdate("c", $d);
         }
-        return date("c", strtotime($d));
+        return gmdate("c", strtotime($d));
     }
 
     private function modified_after($modified_after) {
@@ -261,9 +261,9 @@ class RevEngineAPI {
         return [
             'column'     => 'post_modified_gmt',
             "after" => [
-                "year" => date("Y", $d),
-                "month" => date("n", $d),
-                "day" => date("j", $d)
+                "year" => gmdate("Y", $d),
+                "month" => gmdate("n", $d),
+                "day" => gmdate("j", $d)
             ]
         ];
     }
@@ -514,20 +514,19 @@ class RevEngineAPI {
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $result = [];
-        $sql = "SELECT COUNT(*) AS count FROM wp_users";
-        $count = intval($wpdb->get_results($sql)[0]->count);
+        $count = intval($wpdb->get_var("SELECT COUNT(*) AS count FROM wp_users"));
         $page_count = ceil(intval($count) / $per_page);
         $offset = ($page - 1) * $per_page;
         if (empty($request->get_param("id"))) {
             $sql = "SELECT * FROM wp_users ORDER BY ID LIMIT $per_page OFFSET $offset";
+            $users = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_users ORDER BY ID LIMIT %d OFFSET %d", [$per_page, $offset]));
         } else {
             $page_count = $count = $offset = 1;
-            $sql = "SELECT * FROM wp_users WHERE ID={$request->get_param('id')}";
+            $users = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_users WHERE ID=%d", $request->get_param('id')));
         }
-        $users = (array) $wpdb->get_results($sql);
+        
         foreach($users as $user) {
-            $sql = "SELECT * FROM wp_usermeta WHERE user_id={$user->ID}";
-            $user_meta = $wpdb->get_results($sql);
+            $user_meta = $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_usermeta WHERE user_id=%d", $user->ID));
             foreach($user_meta as $meta) {
                 $val = $this->isSerialized($meta->meta_value) ? 
                     unserialize($meta->meta_value) : 
@@ -608,6 +607,7 @@ class RevEngineAPI {
                 $order_data = $this->normalise_fields($order_data);
                 $result[] = $order_data;
             } catch(Exception $err) {
+                // phpcs:ignore
                 trigger_error($err, E_USER_WARNING);
             }
         }
@@ -735,8 +735,7 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $post) {
             try {
-                $sql = "SELECT * FROM wp_postmeta WHERE post_id={$post->ID}";
-                $post_meta = $wpdb->get_results($sql);
+                $post_meta = $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_postmeta WHERE post_id=%d", $post->ID));
                 foreach($post_meta as $meta) {
                     $val = $this->isSerialized($meta->meta_value) ? 
                         unserialize($meta->meta_value) : 
@@ -785,6 +784,7 @@ class RevEngineAPI {
                 $post = $this->filter_fields($post, $this->membership_filtered_fields);
                 $result[] = $post;
             } catch(Exception $err) {
+                // phpcs:ignore
                 trigger_error($err, E_USER_WARNING);
             }
         }
