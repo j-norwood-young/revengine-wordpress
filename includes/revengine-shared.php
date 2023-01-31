@@ -11,16 +11,20 @@ function revengine_fire_callback($endpoint, $data) {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
+            //phpcs:ignore
             error_log("RevEngine Callback error: " . curl_error($ch));
             $response = curl_error($ch);
         }
         curl_close($ch);
         if (get_option("revengine_callback_debug")) {
+            //phpcs:ignore
             error_log("RevEngine Callback URL: " . $url);
+            //phpcs:ignore
             error_log("RevEngine Callback Response: " . print_r($response, true));
         }
         return $response;
     } catch (Exception $e) {
+        //phpcs:ignore
         error_log($e->getMessage());
     }
 }
@@ -29,6 +33,7 @@ function revengine_test_callback() {
     try {
         return revengine_fire_callback("/test", array("test" => "test"));
     } catch (Exception $e) {
+        //phpcs:ignore
         error_log($e->getMessage());
     }
 }

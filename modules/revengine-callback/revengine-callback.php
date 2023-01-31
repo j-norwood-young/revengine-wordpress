@@ -42,7 +42,7 @@ class RevEngineCallback {
     function admin_options_template() {
         $callback_result = null;
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.'));
+            wp_die(esc_html('You do not have sufficient permissions to access this page.'));
         }
         if (!empty(get_option("revengine_callback_url"))) {
             $callback_result = revengine_test_callback();
@@ -68,6 +68,7 @@ class RevEngineCallback {
             ];
             revengine_fire_callback("/woocommerce/subscription/update", $result);
         } catch (Exception $e) {
+            //phpcs:ignore
             error_log($e->getMessage());
         }
     }
@@ -82,6 +83,7 @@ class RevEngineCallback {
             ];
             revengine_fire_callback("/wordpress/user/update", $result);
         } catch (Exception $e) {
+            //phpcs:ignore
             error_log($e->getMessage());
         }
     }
@@ -94,6 +96,7 @@ class RevEngineCallback {
             ];
             revengine_fire_callback("/wordpress/user/create", $result);
         } catch (Exception $e) {
+            //phpcs:ignore
             error_log($e->getMessage());
         }
     }
@@ -106,6 +109,7 @@ class RevEngineCallback {
             ];
             revengine_fire_callback("/wordpress/user/delete", $result);
         } catch (Exception $e) {
+            //phpcs:ignore
             error_log($e->getMessage());
         }
     }
