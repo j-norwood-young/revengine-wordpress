@@ -13,14 +13,14 @@ class RevEngineUserLabels {
         add_action( 'wp_login', [ $this, 'inject_revengine_labels' ], 10, 2 );
         add_action( 'edit_user_profile', [ $this, 'show_revengine_labels_on_edit_profile' ], 5, 1);
         add_action( 'show_user_profile', [ $this, 'show_revengine_labels_on_edit_profile' ], 5, 1);
-        $revengine_user_label_schedule_enabled = get_option("revengine_user_label_schedule_enabled");
+        /*$revengine_user_label_schedule_enabled = get_option("revengine_user_label_schedule_enabled");
         if (!empty($revengine_user_label_schedule_enabled)) {
             if ( false === as_has_scheduled_action( 'revengine_user_label_sync' ) ) {
                 as_schedule_recurring_action( strtotime( 'tomorrow' ), DAY_IN_SECONDS, 'revengine_user_label_sync', array(), 'revengine' );
             }
         } else {
             as_unschedule_all_actions( 'revengine_user_label_sync' );
-        }
+        }*/
         add_action("revengine_user_label_sync", [ $this, 'revengine_user_label_sync' ]);
         add_action("admin_post_revengine_user_label_sync", [ $this, 'queue_now' ]);
         add_action('admin_init', [ $this, 'register_settings' ]);
