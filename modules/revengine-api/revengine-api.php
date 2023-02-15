@@ -665,6 +665,9 @@ class RevEngineAPI {
         $result = [];
         foreach ($posts as $post) {
             $subscription = wcs_get_subscription( $post );
+            if (empty($subscription)) {
+                continue;
+            }
             $subscription_data = $subscription->get_data();
             foreach($subscription_data["line_items"] as $line_item) {
                 $line_item_data = $line_item->get_data();
