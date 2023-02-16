@@ -537,7 +537,7 @@ class RevEngineAPI {
             $user = $this->normalise_fields($user);
             $user = $this->filter_fields($user, $this->user_filtered_fields);
             foreach($date_fields as $date_field) {
-                if ($user[$date_field]) {
+                if (!empty($user[$date_field])) {
                     $user[$date_field] = $this->convert_to_date($user[$date_field]);
                 }
             }
