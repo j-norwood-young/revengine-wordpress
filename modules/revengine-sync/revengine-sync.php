@@ -71,7 +71,7 @@ class RevEngineSync {
         $jsvars["wordpress_id_field"] = $wordpress_id_field;
         $furl = plugin_dir_url( __FILE__ ) . 'js/sync.js';
         $fname = plugin_dir_path( __FILE__ ) . 'js/sync.js';
-        $ver = date("ymd-Gis", filemtime($fname));
+        $ver = gmdate("ymd-Gis", filemtime($fname));
         wp_enqueue_script( 'jquery-ui-progressbar');  // the progress bar
         wp_enqueue_script( "revengine-piano-sync", $furl, null, $ver, true );
         wp_localize_script( "revengine-piano-sync", "revengine_piano_sync_vars", $jsvars);
@@ -83,6 +83,11 @@ class RevEngineSync {
             'methods' => 'GET',
             'callback' => [$this, 'sync_users'],
             'permission_callback' => [$this, 'check_access']
+        ));
+        register_rest_route( 'revengine/v1', '/sync_user/(?P<revengine_id>[a-z0-9]+)', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'sync_user'],
+            'permission_callback' => [$this, 'check_access'],
         ));
     }
 
@@ -104,8 +109,48 @@ class RevEngineSync {
         return false;
     }
 
+    private function _save_reader($reader) {
+        $revengine_sync_api_key = get_option("revengine_sync_api_key");
+        $revengine_sync_api_url = get_option("revengine_sync_api_url");
+        $wordpress_id_field = "wordpress_id";
+        try {
+            $reader_id = $reader->_id;
+            $reader_email = $reader->email;
+            $reader_name = $reader->fist_name ?? $reader->display_name ?? explode("@", $reader->email)[0];
+            $user_id = email_exists( $reader_email );
+            $reader->reader_name = $reader_name;
+            if (!$user_id) {
+                if (username_exists($reader_name)) {
+                    $reader_name = $reader_email;
+                    $reader->reader_name = $reader_name;
+                }
+                $random_password = wp_generate_password( 12, false );
+                $user_id = wp_create_user( $reader_name, $random_password, $reader_email );
+                if (!is_wp_error($user_id)) {
+                    Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
+                        $wordpress_id_field => $user_id
+                    ]);
+                    $reader->wordpress_user_id = $user_id;
+                    $reader->op = "create";
+                } else {
+                    $reader->error = $user_id;
+                    // phpcs:ignore
+                    trigger_error($user_id, E_USER_WARNING);
+                }
+            } else {
+                Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
+                    $wordpress_id_field => $user_id
+                ]);
+                $reader->wordpress_user_id = $user_id;
+                $reader->op = "update";
+            }
+        } catch(Exception $err) {
+            throw $err;
+        }
+        return $reader;
+    }
+
     private function _sync_user_page($page, $per_page=self::PER_PAGE) {
-        global $wp;
         $revengine_sync_api_key = get_option("revengine_sync_api_key");
         $revengine_sync_api_url = get_option("revengine_sync_api_url");
         $test_mode = get_option("revengine_sync_test_mode");
@@ -118,50 +163,40 @@ class RevEngineSync {
         for($x = 0; $x < sizeof($readers); $x++) {
             $reader = $readers[$x];
             try {
-                trigger_error($reader->_id, E_USER_NOTICE);
-                $reader_id = $reader->_id;
-                $reader_email = $reader->email;
-                $reader_name = $reader->fist_name ?? $reader->display_name ?? explode("@", $reader->email)[0];
-                $user_id = email_exists( $reader_email );
-                $readers[$x]->reader_name = $reader_name;
-                if (!$user_id) {
-                    if (username_exists($reader_name)) {
-                        $reader_name = $reader_email;
-                        $readers[$x]->reader_name = $reader_name;
-                    }
-                    $random_password = wp_generate_password( $length = 12, $include_standard_special_chars = false );
-                    $user_id = wp_create_user( $reader_name, $random_password, $reader_email );
-                    if (!is_wp_error($user_id)) {
-                        $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
-                            $wordpress_id_field => $user_id
-                        ]);
-                        $readers[$x]->wordpress_user_id = $user_id;
-                        $readers[$x]->op = "create";
-                    } else {
-                        $readers[$x]->error = $user_id;
-                        trigger_error($user_id, E_USER_WARNING);
-                    }
-                } else {
-                    $put_result = Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
-                        $wordpress_id_field => $user_id
-                    ]);
-                    $readers[$x]->wordpress_user_id = $user_id;
-                    $readers[$x]->op = "update";
-                }
-                trigger_error(json_encode($readers[$x]), E_USER_NOTICE);
+                $reader = $this->_save_reader($reader);
             } catch(Exception $err) {
-                $readers[$x]->error = $err;
-                trigger_error($err, E_USER_ERROR);
+                $reader->error = $err->getMessage();
+                // phpcs:ignore
+                trigger_error($err->getMessage(), E_USER_WARNING);
             }
         }
         return $readers;
     }
 
     function sync_users(WP_REST_Request $request) {
-        global $wp;
         $per_page = intval($request->get_param( "per_page") ?? self::PER_PAGE);
         $page = intval($request->get_param( "page") ?? 1);
         $result = $this->_sync_user_page($page, $per_page);
+        return $result;
+    }
+
+    private function _sync_user($revengine_id) {
+        $revengine_sync_api_key = get_option("revengine_sync_api_key");
+        $revengine_sync_api_url = get_option("revengine_sync_api_url");
+        $reader =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader/$revengine_id?apikey=$revengine_sync_api_key"))->body)->data;
+        try {
+            $reader = $this->_save_reader($reader);
+        } catch(Exception $err) {
+            $reader->error = $err->getMessage();
+            // phpcs:ignore
+            trigger_error($err->getMessage(), E_USER_WARNING);
+        }
+        return $reader;
+    }
+
+    function sync_user(WP_REST_Request $request) {
+        $revengine_id = $request->get_param("revengine_id");
+        $result = $this->_sync_user($revengine_id);
         return $result;
     }
 
@@ -175,15 +210,16 @@ class RevEngineSync {
         }
         $count_result = json_decode((Requests::get( "$revengine_sync_api_url/count/reader?filter[wordpress_id]=\$exists:false&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body);
         if ($count_result->status === "error") {
+            // phpcs:ignore
             trigger_error("RevEngine Sync All Users Error: {$count_result->message->error}", E_USER_ERROR);
         }
-        trigger_error($count_result, E_USER_NOTICE);
+        // trigger_error($count_result, E_USER_NOTICE);
         $count = json_decode((Requests::get( "$revengine_sync_api_url/count/reader?filter[wordpress_id]=\$exists:false&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body)->count;
         $per_page = self::PER_PAGE;
         $pages = ceil($count / $per_page);
         for($page = 0; $page < $pages; $page++) {
             $this->_sync_user_page($page);
-            trigger_error("RevEngine Sync Users Page $page of $pages, per page $per_page, count $count", E_USER_NOTICE);
+            // trigger_error("RevEngine Sync Users Page $page of $pages, per page $per_page, count $count", E_USER_NOTICE);
         }
     }
 
