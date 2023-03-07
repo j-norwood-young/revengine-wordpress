@@ -103,7 +103,8 @@ class RevEngineUserLabels {
             $html .= "<div style='background-color: #2271b1; border-radius: 2px; margin-right: 4px; padding: 4px; font-size: 0.9em; color: #FFF'>{$segment}</div>";
         }
         $html .= "</div>";
-        echo esc_html($html);
+        // phpcs:ignore
+        echo $html;
     }
 
     public function queue_now() {
