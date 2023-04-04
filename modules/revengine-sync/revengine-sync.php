@@ -184,6 +184,9 @@ class RevEngineSync {
         $revengine_sync_api_key = get_option("revengine_sync_api_key");
         $revengine_sync_api_url = get_option("revengine_sync_api_url");
         $reader =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader/$revengine_id?apikey=$revengine_sync_api_key"))->body)->data;
+        if (!$reader) {
+            return new WP_Error( 'revengine_sync_user_not_found', __( 'RevEngine user not found', 'revengine' ), array( 'status' => 404 ) );
+        }
         try {
             $reader = $this->_save_reader($reader);
         } catch(Exception $err) {

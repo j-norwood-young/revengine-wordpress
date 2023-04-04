@@ -1,7 +1,7 @@
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="wrap">
 
-    <h2><?php _e( 'RevEngine Piano Composer Options', 'revengine-sync-options' ); ?></h2>
+    <h2><?php _e( 'RevEngine Sync Options', 'revengine-sync-options' ); ?></h2>
     <?php settings_errors(); ?>
 
     <form method="post" action="options.php">
