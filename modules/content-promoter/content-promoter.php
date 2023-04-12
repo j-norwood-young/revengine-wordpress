@@ -44,7 +44,7 @@ class ContentPromoter {
         $options->articles = $front_page;
         $furl = plugin_dir_url( __FILE__ ) . 'js/frontpage_inject.js';
         $fname = plugin_dir_path( __FILE__ ) . 'js/frontpage_inject.js';
-        $ver = date("ymd-Gis", filemtime($fname));
+        $ver = gmdate("ymd-Gis", filemtime($fname));
         wp_enqueue_script( "revengine-content-promoter", $furl, null, $ver, true );
         wp_localize_script( "revengine-content-promoter", "revengine_content_promoter_vars", $options);
     }
