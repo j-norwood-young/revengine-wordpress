@@ -429,6 +429,9 @@ class RevEngineAPI {
 
     public function getFeaturedPostsArgs($frontPage = 'main') : array
     {
+        if (!defined('HOMEPAGE_FEATURED_POSTS_DISPLAY_COUNT')) {
+            define('HOMEPAGE_FEATURED_POSTS_DISPLAY_COUNT', 50);
+        }
         $metaKey = 'dm-frontpage-' . $frontPage .'-ordering';
 
         return [
@@ -442,7 +445,6 @@ class RevEngineAPI {
                     'field'    => 'slug',
                     'terms'    => 'featured' . (($frontPage != 'main') ? '-'.$frontPage : '')
                 ],
-                $this->excludeNewsDeck
             ],
             'meta_key' => $metaKey,
             'orderby' => 'meta_value_num',
