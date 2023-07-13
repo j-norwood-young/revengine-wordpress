@@ -20,10 +20,50 @@
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Callback URL</th>
+                    <th scope="row">Subscription Updated Callback URL</th>
                     <td>
-                        <label for="revengine_callback_url">
-                            <input name="revengine_callback_url" type="url" id="revengine_callback_url" value="<?php esc_attr_e(get_option("revengine_callback_url")) ?>">
+                        <label for="revengine_callback_url_subscription_updated">
+                            <input name="revengine_callback_url_subscription_updated" type="url" id="revengine_callback_url_subscription_updated" value="<?php esc_attr_e(get_option("revengine_callback_url_subscription_updated")) ?>">
+                        </label>
+                    </td>
+                </tr>
+                <!-- <tr>
+                    <th scope="row">Subscription Created Callback URL</th>
+                    <td>
+                        <label for="revengine_callback_url_subscription_created">
+                            <input name="revengine_callback_url_subscription_created" type="url" id="revengine_callback_url_subscription_created" value="<?php esc_attr_e(get_option("revengine_callback_url_subscription_created")) ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Subscription Deleted Callback URL</th>
+                    <td>
+                        <label for="revengine_callback_url_subscription_deleted">
+                            <input name="revengine_callback_url_subscription_deleted" type="url" id="revengine_callback_url_subscription_deleted" value="<?php esc_attr_e(get_option("revengine_callback_url_subscription_deleted")) ?>">
+                        </label>
+                    </td>
+                </tr> -->
+                <tr>
+                    <th scope="row">Wordpress User Profile Updated</th>
+                    <td>
+                        <label for="revengine_callback_url_user_profile_updated">
+                            <input name="revengine_callback_url_user_profile_updated" type="url" id="revengine_callback_url_user_profile_updated" value="<?php esc_attr_e(get_option("revengine_callback_url_user_profile_updated")) ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Wordpress User Profile Created</th>
+                    <td>
+                        <label for="revengine_callback_url_user_profile_created">
+                            <input name="revengine_callback_url_user_profile_created" type="url" id="revengine_callback_url_user_profile_created" value="<?php esc_attr_e(get_option("revengine_callback_url_user_profile_created")) ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Wordpress User Profile Deleted</th>
+                    <td>
+                        <label for="revengine_callback_url_user_profile_deleted">
+                            <input name="revengine_callback_url_user_profile_deleted" type="url" id="revengine_callback_url_user_profile_deleted" value="<?php esc_attr_e(get_option("revengine_callback_url_user_profile_deleted")) ?>">
                         </label>
                     </td>
                 </tr>
