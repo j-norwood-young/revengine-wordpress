@@ -105,6 +105,8 @@ class RevEngineCallback {
 
     function woocommerce_subscription_status_updated($subscription, $old, $new) {
         try {
+            $url = get_option("revengine_callback_url_subscription_updated");
+            if (empty($url)) return;
             $subscription_data = $subscription->get_data();
             foreach($subscription_data["line_items"] as $line_item) {
                 $line_item_data = $line_item->get_data();
@@ -120,7 +122,7 @@ class RevEngineCallback {
                 "old" => $old,
                 "new" => $new,
             ];
-            $this->post(get_option("revengine_callback_url_subscription_updated"), $result);
+            $this->post($url, $result);
         } catch (Exception $e) {
             //phpcs:ignore
             error_log($e->getMessage());
@@ -129,6 +131,8 @@ class RevEngineCallback {
 
     function wordpress_profile_updated($user_id, $old, $new) {
         try {
+            $url = get_option("revengine_callback_url_user_profile_updated");
+            if (empty($url)) return;
             $user = get_userdata($user_id);
             $result = [
                 "action" => "wordpress_profile_updated",
@@ -136,7 +140,7 @@ class RevEngineCallback {
                 "old" => $old->data,
                 "new" => $new,
             ];
-            $this->post(get_option("revengine_callback_url_user_profile_updated"), $result);
+            $this->post($url, $result);
         } catch (Exception $e) {
             //phpcs:ignore
             error_log($e->getMessage());
@@ -145,12 +149,14 @@ class RevEngineCallback {
 
     function wordpress_user_profile_created($user_id) {
         try {
+            $url = get_option("revengine_callback_url_user_profile_created");
+            if (empty($url)) return;
             $user = get_userdata($user_id);
             $result = [
                 "action" => "wordpress_user_profile_created",
                 "user" => $user,
             ];
-            $this->post(get_option("revengine_callback_url_user_profile_updated"), $result);
+            $this->post($url, $result);
         } catch (Exception $e) {
             //phpcs:ignore
             error_log($e->getMessage());
@@ -159,12 +165,14 @@ class RevEngineCallback {
 
     function wordpress_user_profile_deleted($user_id) {
         try {
+            $url = get_option("revengine_callback_url_user_profile_deleted");
+            if (empty($url)) return;
             $user = get_userdata($user_id);
             $result = [
                 "action" => "wordpress_user_profile_deleted",
                 "user" => $user,
             ];
-            $this->post(get_option("revengine_callback_url_user_profile_deleted"), $result);
+            $this->post($url, $result);
         } catch (Exception $e) {
             //phpcs:ignore
             error_log($e->getMessage());

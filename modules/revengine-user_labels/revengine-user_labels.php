@@ -1,7 +1,5 @@
 <?php
 
-require_once( plugin_dir_path( __FILE__ ) . '../../libraries/action-scheduler/action-scheduler.php' );
-
 class RevEngineUserLabels {
 
     private $options = [
