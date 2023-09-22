@@ -1,0 +1,1 @@
+<img style="width:0;height:0;border:0;border:none;position:absolute;left:10px;top:10px" src="<?php echo esc_url($url) ?>" alt="revengine-tracker" data-ampdevmode="data-ampdevmode">
