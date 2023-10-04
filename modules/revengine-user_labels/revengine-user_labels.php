@@ -87,6 +87,9 @@ class RevEngineUserLabels {
         if ( empty( $data ) ) {
             return;
         }
+        if ( empty( $data->labels ) && empty( $data->segments ) ) {
+            return;
+        }
         $labels = $data->labels;
         $html .= "<h4>Labels</h4>";
         $html .= "<div style='display: flex; flex-wrap: wrap;'>";
@@ -94,6 +97,11 @@ class RevEngineUserLabels {
             $html .= "<div style='background-color: #2271b1; border-radius: 2px; margin-right: 4px; padding: 4px; font-size: 0.9em; color: #FFF'>{$label}</div>";
         }
         $html .= "</div>";
+        if ( empty( $data->segments ) ) {
+            // phpcs:ignore
+            echo $html;
+            return;
+        }
         $segments = $data->segments;
         $html .= "<h4>Segments</h4>";
         $html .= "<div style='display: flex; flex-wrap: wrap;'>";
