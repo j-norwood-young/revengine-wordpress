@@ -143,7 +143,8 @@ class RevEngineTracker {
     }
 
     function javascript() {
-        $url = get_option("revengine_tracker_url") . "?" . http_build_query($this->_get_post_data());
+        $url = get_option("revengine_tracker_url");
+        $data = $this->_get_post_data();
         require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-tracker/templates/frontend/javascript.php';
     }
 
