@@ -103,7 +103,7 @@ class RevEngineCallback {
         require_once plugin_dir_path( dirname( __FILE__ ) ).'revengine-callback/templates/admin/revengine-callback-settings.php';
     }
 
-    function woocommerce_subscription_status_updated($subscription, $old, $new) {
+    function woocommerce_subscription_status_updated($subscription, $new, $old) {
         try {
             $url = get_option("revengine_callback_url_subscription_updated");
             if (empty($url)) return;
