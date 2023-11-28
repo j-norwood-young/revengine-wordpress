@@ -135,7 +135,7 @@ class RevEngineSync {
                 } else {
                     $reader->error = $user_id;
                     // phpcs:ignore
-                    trigger_error($user_id, E_USER_WARNING);
+                    trigger_error($user_id->get_error_message(), E_USER_WARNING);
                 }
             } else {
                 Requests::put( "$revengine_sync_api_url/api/reader/$reader_id?apikey=$revengine_sync_api_key", [], [
@@ -159,7 +159,6 @@ class RevEngineSync {
             $wordpress_id_field = "test_wordpress_id";
         }
         $readers =  json_decode((Requests::get( "$revengine_sync_api_url/api/reader?page=$page&limit=$per_page&fields=email,first_name,last_name,display_name,wordpress_id&filter[$wordpress_id_field]=\$exists:false&apikey=$revengine_sync_api_key"))->body)->data;
-        // return $readers;
         for($x = 0; $x < sizeof($readers); $x++) {
             $reader = $readers[$x];
             try {

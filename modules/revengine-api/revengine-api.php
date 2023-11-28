@@ -137,6 +137,13 @@ class RevEngineAPI {
         if (!empty($revengine_enable_api)) {
             add_action('rest_api_init', [$this, 'register_api_routes' ]);
         }
+        // Make sure we save user meta on user create and update
+        if (function_exists("wc_update_profile_last_update_time")) {
+            add_action("user_register", "wc_update_profile_last_update_time", 10, 2);
+        } else {
+            add_action("user_register", [$this, "set_user_last_update_time"], 10, 2);
+            add_action("profile_update", [$this, "set_user_last_update_time"], 10, 2);
+        }
     }
 
     function options_page() {
@@ -209,6 +216,10 @@ class RevEngineAPI {
             'callback' => [$this, 'get_woocommerce_memberships'],
             'permission_callback' => [$this, 'check_access']
         ));
+    }
+
+    public function set_user_last_update_time( $user_id ) {
+        update_user_meta( $user_id, 'last_update', gmdate( 'U' ) );
     }
 
     function filter_fields($data, $filtered_fields) {
@@ -516,17 +527,22 @@ class RevEngineAPI {
         $per_page = intval($request->get_param( "per_page") ?? 10);
         $page = intval($request->get_param( "page") ?? 1);
         $result = [];
-        $count = intval($wpdb->get_var("SELECT COUNT(*) AS count FROM wp_users"));
-        $page_count = ceil(intval($count) / $per_page);
         $offset = ($page - 1) * $per_page;
+        $modified_after = $request->get_param( "modified_after");
         if (empty($request->get_param("id"))) {
-            $sql = "SELECT * FROM wp_users ORDER BY ID LIMIT $per_page OFFSET $offset";
-            $users = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_users ORDER BY ID LIMIT %d OFFSET %d", [$per_page, $offset]));
+            if (!empty($modified_after)) {
+                $count = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS count FROM wp_users LEFT JOIN wp_usermeta ON wp_users.ID = wp_usermeta.user_id AND wp_usermeta.meta_key = 'last_update' WHERE FROM_UNIXTIME(wp_usermeta.meta_value) >= %s", $modified_after)));
+                $users = (array) $wpdb->get_results($wpdb->prepare("SELECT wp_users.*, FROM_UNIXTIME(wp_usermeta.meta_value) AS last_update FROM wp_users LEFT JOIN wp_usermeta ON wp_users.ID = wp_usermeta.user_id AND wp_usermeta.meta_key = 'last_update' WHERE FROM_UNIXTIME(wp_usermeta.meta_value) >= %s ORDER BY last_update DESC LIMIT %d OFFSET %d", [$modified_after, $per_page, $offset]));
+            } else {
+                $count = intval($wpdb->get_var("SELECT COUNT(*) AS count FROM wp_users"));
+                $users = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_users ORDER BY ID LIMIT %d OFFSET %d", [$per_page, $offset]));
+            }
         } else {
+            $count = 1;
             $page_count = $count = $offset = 1;
             $users = (array) $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_users WHERE ID=%d", $request->get_param('id')));
         }
-        
+        $page_count = ceil(intval($count) / $per_page);
         foreach($users as $user) {
             $user_meta = $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_usermeta WHERE user_id=%d", $user->ID));
             foreach($user_meta as $meta) {
@@ -535,7 +551,6 @@ class RevEngineAPI {
                     $meta->meta_value;
                 $user->{$meta->meta_key} = $val;
             }
-            // print_r($user);
             $user = $this->normalise_fields($user);
             $user = $this->filter_fields($user, $this->user_filtered_fields);
             foreach($date_fields as $date_field) {
