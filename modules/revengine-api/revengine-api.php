@@ -188,6 +188,11 @@ class RevEngineAPI {
             'callback' => [$this, 'get_featured'],
             'permission_callback' => [$this, 'check_access']
         ));
+        register_rest_route( 'revengine/v1', '/post', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_post'],
+            'permission_callback' => [$this, 'check_access']
+        ));
         register_rest_route( 'revengine/v1', '/users', array(
             'methods' => 'GET',
             'callback' => [$this, 'get_users'],
@@ -511,6 +516,61 @@ class RevEngineAPI {
             "total_count" => count($posts),
         ];
         $data["data"] = $result;
+        return $data;
+    }
+
+    function get_post(WP_REST_Request $request) {
+        global $wp;
+        $post_id = $request->get_param( "id");
+        $post = get_post($post_id);
+        $post->author = get_author_name($post->post_author);
+        $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
+        $post->img_medium = get_the_post_thumbnail_url($post->ID, "medium");
+        $post->img_full = get_the_post_thumbnail_url($post->ID, "full");
+        $tags = get_the_terms($post->ID, $post->post_type . "_tag");
+        if (is_array($tags)) {
+            $post->tags = array_map(function($i) { return $i->name; }, $tags);
+        } else {
+            $post->tags = [];
+        }
+        $terms = get_the_terms($post->ID, "section");
+        if (is_array($terms)) {
+            $post->sections = array_map(function($i) { return $i->name; }, $terms);
+        } else {
+            $post->sections = [];
+        }
+        $featured = false;
+        $flags = get_the_terms($post->ID, "flag");
+        $position = null;
+        if (is_array($flags)) {
+            foreach ($flags as $key => $flag) {
+                if ($flag->slug === "featured") {
+                    $featured = true;
+                    $position = intval(get_post_meta($post->ID, 'dm-frontpage-main-ordering')[0]);
+                }
+            }
+        }
+        $result = [
+            "post_id" => $post->ID,
+            "author" => $post->author,
+            "date_published" => $post->post_date,
+            "date_modified" => $post->post_modified,
+            "title" => $post->post_title,
+            "excerpt" => $post->post_excerpt,
+            "content" => $post->post_content,
+            "urlid" => $post->guid,
+            "type" => $post->post_type,
+            "tags" => $post->tags,
+            "sections" => $post->sections,
+            "featured" => $featured,
+            "position" => $position,
+            "img_thumbnail" => $post->img_thumbnail,
+            "img_medium" => $post->img_medium,
+            "img_full" => $post->img_full,
+        ];
+        $data = [
+            "data" => $result,
+        ];
         return $data;
     }
 
