@@ -5,7 +5,7 @@
  * Description: Data from the reader's perspective. A Daily Maverick initiative sponsored by the Google News Initiative.
  * Author: DailyMaverick, Jason Norwood-Young
  * Author URI: https://dailymaverick.co.za
- * Version: 0.4.2
+ * Version: 0.4.3
  * WC requires at least: 5.8
  * Tested up to: 6.0
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'REVENGINE_WORDPRESS_VERSION', '0.4.2' );
+define( 'REVENGINE_WORDPRESS_VERSION', '0.4.3' );
 
 function revengine_init() {
     $revengine_globals = [];

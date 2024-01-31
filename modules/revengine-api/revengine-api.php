@@ -558,7 +558,7 @@ class RevEngineAPI {
             "title" => $post->post_title,
             "excerpt" => $post->post_excerpt,
             "content" => $post->post_content,
-            "urlid" => $post->guid,
+            "urlid" => $post->post_name,
             "type" => $post->post_type,
             "tags" => $post->tags,
             "sections" => $post->sections,
