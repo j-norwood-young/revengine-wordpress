@@ -523,7 +523,14 @@ class RevEngineAPI {
         global $wp;
         $post_id = $request->get_param( "id");
         $post = get_post($post_id);
-        $post->author = get_author_name($post->post_author);
+        if (empty($post)) {
+            return new WP_Error( 'no_post', 'No post found with that ID', array( 'status' => 404 ) );
+        }
+        if (!empty($post->post_author)) {
+            $post->author = get_author_name($post->post_author);
+        } else {
+            $post->author = "";
+        }
         $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
         $post->img_medium = get_the_post_thumbnail_url($post->ID, "medium");
         $post->img_full = get_the_post_thumbnail_url($post->ID, "full");
