@@ -526,26 +526,23 @@ class RevEngineAPI {
         if (empty($post)) {
             return new WP_Error( 'no_post', 'No post found with that ID', array( 'status' => 404 ) );
         }
+        $author = "";
         if (!empty($post->post_author)) {
-            $post->author = get_author_name($post->post_author);
-        } else {
-            $post->author = "";
-        }
-        $post->img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
-        $post->img_medium = get_the_post_thumbnail_url($post->ID, "medium");
-        $post->img_full = get_the_post_thumbnail_url($post->ID, "full");
+            $author = get_author_name($post->post_author);
+        } 
+        $img_thumbnail = get_the_post_thumbnail_url($post->ID, "thumbnail");
+        $img_medium = get_the_post_thumbnail_url($post->ID, "medium");
+        $img_full = get_the_post_thumbnail_url($post->ID, "full");
         $tags = get_the_terms($post->ID, $post->post_type . "_tag");
+        $tags = [];
         if (is_array($tags)) {
-            $post->tags = array_map(function($i) { return $i->name; }, $tags);
-        } else {
-            $post->tags = [];
+            $tags = array_map(function($i) { return $i->name; }, $tags);
         }
         $terms = get_the_terms($post->ID, "section");
+        $sections = [];
         if (is_array($terms)) {
-            $post->sections = array_map(function($i) { return $i->name; }, $terms);
-        } else {
-            $post->sections = [];
-        }
+            $sections = array_map(function($i) { return $i->name; }, $terms);
+        } 
         $featured = false;
         $flags = get_the_terms($post->ID, "flag");
         $position = null;
@@ -559,7 +556,7 @@ class RevEngineAPI {
         }
         $result = [
             "post_id" => $post->ID,
-            "author" => $post->author,
+            "author" => $author,
             "date_published" => $post->post_date,
             "date_modified" => $post->post_modified,
             "title" => $post->post_title,
@@ -567,13 +564,13 @@ class RevEngineAPI {
             "content" => $post->post_content,
             "urlid" => $post->post_name,
             "type" => $post->post_type,
-            "tags" => $post->tags,
-            "sections" => $post->sections,
+            "tags" => $tags,
+            "sections" => $sections,
             "featured" => $featured,
             "position" => $position,
-            "img_thumbnail" => $post->img_thumbnail,
-            "img_medium" => $post->img_medium,
-            "img_full" => $post->img_full,
+            "img_thumbnail" => $img_thumbnail,
+            "img_medium" => $img_medium,
+            "img_full" => $img_full,
         ];
         $data = [
             "data" => $result,
