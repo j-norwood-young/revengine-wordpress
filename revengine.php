@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'REVENGINE_WORDPRESS_VERSION', '0.4.5' );
+define( 'REVENGINE_WORDPRESS_VERSION', '0.4.6' );
 
 function revengine_init() {
     $revengine_globals = [];
