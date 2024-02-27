@@ -376,9 +376,9 @@ class RevEngineAPI {
                 foreach ($flags as $key => $flag) {
                     if ($flag->slug === "featured") {
                         $featured = true;
-                        $dm-frontpage-main-ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
-                        if(is_array($dm-frontpage-main-ordering)){
-                             $position = intval($dm-frontpage-main-ordering[0]);
+                        $dm_frontpage_main_ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
+                        if(is_array($dm_frontpage_main_ordering)){
+                             $position = intval($dm_frontpage_main_ordering[0]);
                         }
                     }
                 }
@@ -496,9 +496,9 @@ class RevEngineAPI {
                 foreach ($flags as $key => $flag) {
                     if ($flag->slug === "featured") {
                         $featured = true;
-                        $dm-frontpage-main-ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
-                        if(is_array($dm-frontpage-main-ordering)){
-                             $position = intval($dm-frontpage-main-ordering[0]);
+                        $dm_frontpage_main_ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
+                        if(is_array($dm_frontpage_main_ordering)){
+                             $position = intval($dm_frontpage_main_ordering[0]);
                         }
                     }
                 }
@@ -556,9 +556,9 @@ class RevEngineAPI {
             foreach ($flags as $key => $flag) {
                 if ($flag->slug === "featured") {
                     $featured = true;
-                    $dm-frontpage-main-ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
-                    if(is_array($dm-frontpage-main-ordering)){
-                         $position = intval($dm-frontpage-main-ordering[0]);
+                    $dm_frontpage_main_ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
+                    if(is_array($dm_frontpage_main_ordering)){
+                         $position = intval($dm_frontpage_main_ordering[0]);
                     }
                 }
             }
