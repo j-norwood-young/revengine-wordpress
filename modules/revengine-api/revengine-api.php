@@ -221,6 +221,11 @@ class RevEngineAPI {
             'callback' => [$this, 'get_woocommerce_memberships'],
             'permission_callback' => [$this, 'check_access']
         ));
+        register_rest_route( 'revengine/v1', '/woocommerce_subscriptions_minimal', array(
+            'methods' => 'GET',
+            'callback' => [$this, 'get_woocommerce_subscriptions_minimal'],
+            'permission_callback' => [$this, 'check_access']
+        ));
     }
 
     public function set_user_last_update_time( $user_id ) {
@@ -896,6 +901,50 @@ class RevEngineAPI {
             $data["next"] = $next_url;
         }
         $data["data"] = $result;
+        return $data;
+    }
+
+    function get_woocommerce_subscriptions_minimal(WP_REST_Request $request) {
+        global $wpdb;
+        global $wp;
+        $per_page = intval($request->get_param( "per_page") ?? 100);
+        $page = intval($request->get_param( "page") ?? 1);
+        $sql = "SELECT wp_posts.ID AS subscription_id, wp_posts.post_status AS status, wp_posts.post_modified_gmt AS modified_gmt, wp_postmeta.meta_key, wp_postmeta.meta_value FROM wp_posts JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id WHERE post_type='shop_subscription' AND wp_postmeta.meta_key IN ('_billing_period', '_customer_user', '_billing_email', '_order_total', '_schedule_start', '_schedule_end', '_schedule_next_payment', '_created_via') ORDER BY post_modified_gmt ASC LIMIT %d OFFSET %d";
+        // phpcs:ignore
+        $posts = $wpdb->get_results($wpdb->prepare($sql, $per_page, ($page - 1) * $per_page));
+        $results = [];
+        foreach($posts as $post) {
+            if (!isset($results[$post->subscription_id])) {
+                $results[$post->subscription_id] = [
+                    "subscription_id" => $post->subscription_id,
+                    "status" => $post->status,
+                    "modified_gmt" => gmdate("c", strtotime($post->modified_gmt)),
+                ];
+            }
+            $name = $post->meta_key;
+            if (strpos($name, '_') === 0) {
+                $name = substr($name, 1);
+            }
+            $results[$post->subscription_id][$name] = $this->isSerialized($post->meta_value) ? unserialize($post->meta_value) : $post->meta_value;
+        }
+        // phpcs:ignore
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM wp_posts WHERE post_type='shop_subscription'");
+        $page_count = ceil(intval($count) / $per_page);
+        $next_url = add_query_arg( ["page" => $page + 1, "per_page" => $per_page], home_url($wp->request) );
+        $prev_url = add_query_arg( ["page" => $page - 1, "per_page" => $per_page], home_url($wp->request) );
+        $data = [
+            "page" => $page,
+            "per_page" => $per_page,
+            "page_count" => $page_count,
+            "total_count" => $count,
+        ];
+        if ($page > 1) {
+            $data["prev"] = $prev_url;
+        }
+        if ($page < $page_count) {
+            $data["next"] = $next_url;
+        }
+        $data["data"] = $results;
         return $data;
     }
 }
