@@ -562,7 +562,7 @@ class RevEngineAPI {
                 if ($flag->slug === "featured") {
                     $featured = true;
                     $dm_frontpage_main_ordering = get_post_meta($post->ID, 'dm-frontpage-main-ordering');
-                    if(is_array($dm_frontpage_main_ordering)){
+                    if(is_array($dm_frontpage_main_ordering) && count($dm_frontpage_main_ordering) > 0) {
                          $position = intval($dm_frontpage_main_ordering[0]);
                     }
                 }
@@ -909,23 +909,46 @@ class RevEngineAPI {
         global $wp;
         $per_page = intval($request->get_param( "per_page") ?? 100);
         $page = intval($request->get_param( "page") ?? 1);
-        $sql = "SELECT wp_posts.ID AS subscription_id, wp_posts.post_status AS status, wp_posts.post_modified_gmt AS modified_gmt, wp_postmeta.meta_key, wp_postmeta.meta_value FROM wp_posts JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id WHERE post_type='shop_subscription' AND wp_postmeta.meta_key IN ('_billing_period', '_customer_user', '_billing_email', '_order_total', '_schedule_start', '_schedule_end', '_schedule_next_payment', '_created_via') ORDER BY post_modified_gmt ASC LIMIT %d OFFSET %d";
+        $sql = "SELECT {$wpdb->prefix}posts.ID AS subscription_id, {$wpdb->prefix}posts.post_status AS status, {$wpdb->prefix}posts.post_modified_gmt AS modified_gmt FROM {$wpdb->prefix}posts WHERE post_type='shop_subscription' ORDER BY {$wpdb->prefix}posts.ID ASC LIMIT %d OFFSET %d";
         // phpcs:ignore
         $posts = $wpdb->get_results($wpdb->prepare($sql, $per_page, ($page - 1) * $per_page));
+        $post_ids = [];
+        foreach($posts as $post) {
+            $post_ids[] = $post->subscription_id;
+        }
+        $meta_sql = "SELECT {$wpdb->prefix}postmeta.post_id AS subscription_id, {$wpdb->prefix}postmeta.meta_key, {$wpdb->prefix}postmeta.meta_value FROM {$wpdb->prefix}postmeta WHERE post_id IN (" . implode(",", $post_ids) . ") AND {$wpdb->prefix}postmeta.meta_key IN ('_billing_period', '_customer_user', '_billing_email', '_order_total', '_schedule_start', '_schedule_end', '_schedule_next_payment', '_created_via')";
+        // phpcs:ignore
+        $meta_posts = $wpdb->get_results($meta_sql);
         $results = [];
         foreach($posts as $post) {
             if (!isset($results[$post->subscription_id])) {
                 $results[$post->subscription_id] = [
                     "subscription_id" => $post->subscription_id,
-                    "status" => $post->status,
-                    "modified_gmt" => gmdate("c", strtotime($post->modified_gmt)),
+                    "status" => str_replace("wc-", "", $post->status),
+                    "date_modified" => gmdate("c", strtotime($post->modified_gmt)),
                 ];
             }
-            $name = $post->meta_key;
-            if (strpos($name, '_') === 0) {
-                $name = substr($name, 1);
+            foreach($meta_posts as $meta_post) {
+                if ($meta_post->subscription_id === $post->subscription_id) {
+                    $name = $meta_post->meta_key;
+                    if (strpos($name, '_') === 0) {
+                        $name = substr($name, 1);
+                    }
+                    if ($name === "customer_user") {
+                        $results[$post->subscription_id]["customer_id"] = $meta_post->meta_value;
+                        continue;
+                    }
+                    if ($name === "modified_gmt") {
+                        $results[$post->subscription_id]["date_modified"] = $meta_post->meta_value;
+                        continue;
+                    }
+                    if ($name === "order_total") {
+                        $results[$post->subscription_id]["total"] = $meta_post->meta_value;
+                        continue;
+                    }
+                    $results[$post->subscription_id][$name] = $this->isSerialized($meta_post->meta_value) ? unserialize($meta_post->meta_value) : $meta_post->meta_value;
+                }
             }
-            $results[$post->subscription_id][$name] = $this->isSerialized($post->meta_value) ? unserialize($post->meta_value) : $post->meta_value;
         }
         // phpcs:ignore
         $count = $wpdb->get_var("SELECT COUNT(*) FROM wp_posts WHERE post_type='shop_subscription'");
@@ -944,6 +967,8 @@ class RevEngineAPI {
         if ($page < $page_count) {
             $data["next"] = $next_url;
         }
+        // Change results to array
+        $results = array_values($results);
         $data["data"] = $results;
         return $data;
     }
